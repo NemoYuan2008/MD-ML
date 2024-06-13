@@ -1,3 +1,7 @@
+# Project-specific files
+fake-offline-data/
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/clion,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=clion,macos
 
@@ -121,7 +125,8 @@ fabric.properties
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
