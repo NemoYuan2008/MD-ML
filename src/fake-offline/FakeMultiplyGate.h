@@ -32,7 +32,7 @@ public:
 private:
     void doRunOffline() override;
 
-    std::size_t dim_mid_{};
+    std::size_t dim_mid_;
 };
 
 

@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+#include "utils/Timer.h"
 #include "share/IsSpdz2kShare.h"
 #include "protocols/PartyWithFakeOffline.h"
 #include "protocols/Gate.h"
@@ -24,6 +25,11 @@ public:
     explicit Circuit(PartyWithFakeOffline<ShrType>& party) : party_(party) {}
 
     void addEndPoint(const std::shared_ptr<Gate<ShrType>>& gate);
+    void runOffline();
+    void readOfflineFromFile();
+    void runOnline();
+    void runOnlineWithBenckmark();
+    void printStats();
 
     std::shared_ptr<InputGate<ShrType>>
     input(std::size_t owner_id, std::size_t dim_row, std::size_t dim_col);
@@ -34,7 +40,8 @@ public:
     std::shared_ptr<SubtractGate<ShrType>>
     subtract(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
 
-
+    std::shared_ptr<MultiplyGate<ShrType>>
+    multiply(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
 
     std::shared_ptr<OutputGate<ShrType>>
     output(const std::shared_ptr<Gate<ShrType>>& input);
@@ -43,6 +50,7 @@ private:
     PartyWithFakeOffline<ShrType>& party_;
     std::vector<std::shared_ptr<Gate<ShrType>>> gates_;
     std::vector<std::shared_ptr<Gate<ShrType>>> endpoints_;
+    Timer timer_;
 };
 
 
@@ -51,6 +59,40 @@ void Circuit<ShrType>::addEndPoint(const std::shared_ptr<Gate<ShrType>>& gate) {
     endpoints_.push_back(gate);
 }
 
+template <typename ShrType>
+void Circuit<ShrType>::runOffline() {
+    for (const auto& gate : endpoints_) {
+        gate->runOffline();
+    }
+}
+
+template <typename ShrType>
+void Circuit<ShrType>::readOfflineFromFile() {
+    for (const auto& gate : endpoints_) {
+        gate->readOfflineFromFile();
+    }
+}
+
+template <typename ShrType>
+void Circuit<ShrType>::runOnline() {
+    for (const auto& gate : endpoints_) {
+        gate->RunOnline();
+    }
+}
+
+template <typename ShrType>
+void Circuit<ShrType>::runOnlineWithBenckmark() {
+    timer_.start();
+    runOnline();
+    timer_.stop();
+}
+
+template <typename ShrType>
+void Circuit<ShrType>::printStats() {
+    std::cout
+        << "Spent " << timer_.elapsed() << " ms\n"
+        << "Sent " << party_.bytes_sent() << " bytes\n";
+}
 
 template <typename ShrType>
 std::shared_ptr<InputGate<ShrType>> Circuit<ShrType>::
@@ -60,7 +102,6 @@ input(std::size_t owner_id, std::size_t dim_row, std::size_t dim_col) {
     return gate;
 }
 
-
 template <typename ShrType>
 std::shared_ptr<AddGate<ShrType>> Circuit<ShrType>::
 add(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y) {
@@ -69,6 +110,23 @@ add(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<Sh
     return gate;
 }
 
+template <typename ShrType>
+std::shared_ptr<SubtractGate<ShrType>> Circuit<ShrType>::
+subtract(const std::shared_ptr<Gate<ShrType>>& input_x,
+         const std::shared_ptr<Gate<ShrType>>& input_y) {
+    auto gate = std::make_shared<SubtractGate<ShrType>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <typename ShrType>
+std::shared_ptr<MultiplyGate<ShrType>> Circuit<ShrType>::
+multiply(const std::shared_ptr<Gate<ShrType>>& input_x,
+         const std::shared_ptr<Gate<ShrType>>& input_y) {
+    auto gate = std::make_shared<MultiplyGate<ShrType>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
 
 template <typename ShrType>
 std::shared_ptr<OutputGate<ShrType>> Circuit<ShrType>::

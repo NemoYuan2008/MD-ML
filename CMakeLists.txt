@@ -9,7 +9,7 @@ find_package(Boost REQUIRED system)
 include_directories(src ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 # Create a directory for fake offline data, and pass it to the compiler
-set(FAKE_OFFLINE_DIR ${PROJECT_SOURCE_DIR}/fake-offline-data)
+set(FAKE_OFFLINE_DIR "${PROJECT_SOURCE_DIR}/fake-offline-data")
 file(MAKE_DIRECTORY ${FAKE_OFFLINE_DIR})
 add_compile_definitions(FAKE_OFFLINE_DIR="${FAKE_OFFLINE_DIR}")
 
@@ -37,6 +37,8 @@ set(SRC_UTILS
         src/utils/uint128_io.h
         src/utils/linear_algebra.h
         src/utils/print_vector.h
+        src/utils/Timer.h
+        src/utils/Timer.cpp
 )
 
 set(SRC_PROTOCOLS
@@ -62,12 +64,14 @@ add_executable(test test.cpp ${SRC_FILES})
 target_include_directories(test PRIVATE src)
 target_link_libraries(test Eigen3::Eigen)
 
-add_executable(party1 party1.cpp)
+add_executable(party0 party0.cpp ${SRC_FILES})
+target_include_directories(party0 PRIVATE src)
+target_link_libraries(party0 Eigen3::Eigen md-ml-networking)
+
+add_executable(party1 party1.cpp ${SRC_FILES})
 target_include_directories(party1 PRIVATE src)
 target_link_libraries(party1 Eigen3::Eigen md-ml-networking)
 
-add_executable(party2 party2.cpp)
-target_include_directories(party2 PRIVATE src)
-target_link_libraries(party2 Eigen3::Eigen md-ml-networking)
-
-add_compile_definitions(MD_ML_DEBUG_ASIO)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(MD_ML_DEBUG_ASIO)
+endif ()

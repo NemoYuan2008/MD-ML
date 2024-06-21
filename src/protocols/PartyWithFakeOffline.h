@@ -29,6 +29,8 @@ public:
 
     // std::vector<ClearType> ReadClear(std::size_t num_elements);
 
+    [[nodiscard]] GlobalKeyType global_key_shr() const { return global_key_shr_; }
+
 private:
     inline static const std::filesystem::path kFakeOfflineDir{FAKE_OFFLINE_DIR}; // The macro is in CMakeLists.txt
     GlobalKeyType global_key_shr_;

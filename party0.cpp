@@ -12,7 +12,9 @@ int main() {
     using ShrType = Spdz2kShare64;
     using ClearType = ShrType::ClearType;
 
-    PartyWithFakeOffline<ShrType> party(1, 2, 5050, "ResNet-18");
+    vector<ClearType> vec(65536, 1);
+
+    PartyWithFakeOffline<ShrType> party(0, 2, 5050, "ResNet-18");
     Circuit<ShrType> circuit(party);
 
     auto a = circuit.input(0, 1, 65536);
@@ -20,6 +22,9 @@ int main() {
     auto c = circuit.multiply(a, b);
     auto d = circuit.output(c);
     circuit.addEndPoint(d);
+
+    a->setInput(vec);
+    b->setInput(vec);
 
     circuit.readOfflineFromFile();
     circuit.runOnlineWithBenckmark();

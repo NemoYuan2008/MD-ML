@@ -5,10 +5,12 @@
 
 
 #include <iostream>
+#include <chrono>
 #include <string>
 #include <vector>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <mutex>
 
 #include <boost/asio.hpp>
@@ -52,6 +54,8 @@ public:
 
     [[nodiscard]] std::size_t my_id() const { return my_id_; }
 
+    [[nodiscard]] uint64_t bytes_sent() const { return bytes_sent_; }
+
 private:
     [[nodiscard]] boost::asio::ip::port_type WhichPort(std::size_t from_id, std::size_t to_id) const;
 
@@ -74,7 +78,9 @@ private:
     std::vector<boost::asio::ip::tcp::endpoint> send_endpoints_;
     std::vector<boost::asio::ip::tcp::acceptor> acceptors_;
     std::vector<boost::asio::steady_timer> timers_;
-    unsigned long long bytes_sent_ = 0;
+    uint64_t bytes_sent_ = 0;
+
+    std::chrono::steady_clock::time_point start_time_, stop_time_;
 
     mutable std::mutex cerr_mutex_;
 };
@@ -94,7 +100,7 @@ void Party::CheckID(std::size_t target_id) const {
 template <std::integral T>
 inline void Party::Send(std::size_t to_id, T message) {
     CheckID(to_id);
-    boost::asio::write(send_sockets_[to_id], boost::asio::buffer(&message, sizeof(message)));
+    bytes_sent_ += boost::asio::write(send_sockets_[to_id], boost::asio::buffer(&message, sizeof(message)));
 #ifdef MD_ML_DEBUG_ASIO
     std::lock_guard cerr_lock(cerr_mutex_);
     std::cerr << "Party " << my_id_ << " sent integer " << message << " to party " << to_id << '\n';
@@ -120,7 +126,7 @@ T Party::Receive(std::size_t from_id) {
 template <std::integral T>
 void Party::SendVec(std::size_t to_id, const std::vector<T>& message) {
     CheckID(to_id);
-    boost::asio::write(send_sockets_[to_id], boost::asio::buffer(message));
+    bytes_sent_ += boost::asio::write(send_sockets_[to_id], boost::asio::buffer(message));
 #ifdef MD_ML_DEBUG_ASIO
     std::lock_guard cerr_lock(cerr_mutex_);
     std::cerr << "Party " << my_id_ << " sent vector to party " << to_id << '\n';

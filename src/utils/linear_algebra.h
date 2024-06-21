@@ -70,6 +70,30 @@ void matrixSubtractAssign(std::vector<T>& x, const std::vector<T>& y) {
 }
 
 
+// matrix scalar product
+template <typename T>
+inline
+std::vector<T> matrixScalar(const std::vector<T>& x, T scalar) {
+    std::vector<T> output(x.size());
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(x.begin(), x.end(), output.begin(), [scalar](T val) { return scalar * val; });
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), output.begin(), [scalar](T val) { return scalar * val; });
+#endif
+    return output;
+}
+
+template <typename T>
+inline
+void matrixScalarAssign(std::vector<T>& x, T scalar) {
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(x.begin(), x.end(), x.begin(), [scalar](T val) { return scalar * val; });
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), x.begin(), [scalar](T val) { return scalar * val; });
+#endif
+}
+
+
 template <typename T>
 inline
 void matrixMultiply(const T* lhs, const T* rhs, T* output,
