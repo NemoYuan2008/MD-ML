@@ -3,7 +3,6 @@
 #include "Party.h"
 
 #include <iostream>
-#include <format>
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -16,8 +15,8 @@
 
 namespace md_ml {
 
-Party::Party(std::size_t p_my_id, std::size_t p_port, std::size_t p_num_parties)
-    : my_id_(p_my_id), port_base_(p_port), num_parties_(p_num_parties) {
+Party::Party(std::size_t p_my_id, std::size_t p_num_parties, std::size_t p_port)
+    : my_id_(p_my_id), num_parties_(p_num_parties), port_base_(p_port) {
     send_sockets_.reserve(num_parties_);
     send_endpoints_.reserve(num_parties_);
     receive_sockets_.reserve(num_parties_);
@@ -110,7 +109,8 @@ void Party::ConnectHandler(const boost::system::error_code& ec, std::size_t to_i
     }
 
     std::lock_guard cerr_lock(cerr_mutex_);
-    std::cerr << std::format("Failed to connect to party {}, retry after {} seconds...\n", to_id, kRetryAfterSeconds);
+    // std::cerr << std::format("Failed to connect to party {}, retry after {} seconds...\n", to_id, kRetryAfterSeconds);
+    std::cerr << "Failed to connect to party " << to_id << ", retry after " << kRetryAfterSeconds << " seconds...\n";
 
     if (send_sockets_[to_id].is_open()) {
         send_sockets_[to_id].close();

@@ -1,7 +1,7 @@
 // By Boshi Yuan
 
-#ifndef FAKEMULTIPLYGATE_H
-#define FAKEMULTIPLYGATE_H
+#ifndef MD_ML_FAKEMULTIPLYGATE_H
+#define MD_ML_FAKEMULTIPLYGATE_H
 
 
 #include <memory>
@@ -58,14 +58,17 @@ void FakeMultiplyGate<ShrType, N>::doRunOffline() {
     auto size_rhs = this->dim_mid() * this->dim_col();
     auto size_output = this->dim_row() * this->dim_col();
 
+    // $\lambda_z$ = rand()
     this->lambda_clear().resize(size_output);
-    std::ranges::for_each(this->lambda_shr(), [size_output](auto& vec) { vec.resize(size_output); });
-    std::ranges::for_each(this->lambda_shr_mac(), [size_output](auto& vec) { vec.resize(size_output); });
+    std::ranges::generate(this->lambda_clear(), getRand<ClearType>);
+
+    auto lambda_shares_and_macs = this->fake_party().GenerateAllPartiesShares(this->lambda_clear());
+    this->lambda_shr() = std::move(lambda_shares_and_macs.value_shares);
+    this->lambda_shr_mac() = std::move(lambda_shares_and_macs.mac_shares);
 
     // Generate the multiplication triples
     std::vector<ClearType> a_clear(size_lhs);
     std::vector<ClearType> b_clear(size_rhs);
-
     std::ranges::generate(a_clear, getRand<ClearType>);
     std::ranges::generate(b_clear, getRand<ClearType>);
     auto c_clear = matrixMultiply(a_clear, b_clear, this->dim_row(), this->dim_mid(), this->dim_col());
@@ -79,10 +82,19 @@ void FakeMultiplyGate<ShrType, N>::doRunOffline() {
     auto delta_y_clear = matrixSubtract(b_clear, this->input_y()->lambda_clear());
 
     // Wrtie all data to files
-    this->fake_party().WriteSharesToAllParites(a_share_with_mac.value_shares, a_share_with_mac.mac_shares);
-    this->fake_party().WriteSharesToAllParites(b_share_with_mac.value_shares, b_share_with_mac.mac_shares);
-    this->fake_party().WriteSharesToAllParites(c_share_with_mac.value_shares, c_share_with_mac.mac_shares);
-    this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    // this->fake_party().WriteSharesToAllParites(a_share_with_mac.value_shares, a_share_with_mac.mac_shares);
+    // this->fake_party().WriteSharesToAllParites(b_share_with_mac.value_shares, b_share_with_mac.mac_shares);
+    // this->fake_party().WriteSharesToAllParites(c_share_with_mac.value_shares, c_share_with_mac.mac_shares);
+    // this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    this->fake_party().WriteSharesToAllParites(a_share_with_mac.value_shares);
+    this->fake_party().WriteSharesToAllParites(a_share_with_mac.mac_shares);
+    this->fake_party().WriteSharesToAllParites(b_share_with_mac.value_shares);
+    this->fake_party().WriteSharesToAllParites(b_share_with_mac.mac_shares);
+    this->fake_party().WriteSharesToAllParites(c_share_with_mac.value_shares);
+    this->fake_party().WriteSharesToAllParites(c_share_with_mac.mac_shares);
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr_mac());
+
     this->fake_party().WriteClearToAllParties(delta_x_clear);
     this->fake_party().WriteClearToAllParties(delta_y_clear);
 }
@@ -90,4 +102,4 @@ void FakeMultiplyGate<ShrType, N>::doRunOffline() {
 
 } // md_ml
 
-#endif //FAKEMULTIPLYGATE_H
+#endif //MD_ML_FAKEMULTIPLYGATE_H

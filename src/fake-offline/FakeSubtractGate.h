@@ -52,18 +52,9 @@ void FakeSubtractGate<ShrType, N>::doRunOffline() {
                                                            this->input_y()->lambda_shr_mac()[party_idx]);
     }
 
-    // // Write the lambda values to the output files, a share is followed by its MAC
-    // for (std::size_t party_idx = 0; party_idx < N; ++party_idx) {
-    //     auto& output_file = this->fake_party().ithPartyFile(party_idx);
-    //
-    //     for (std::size_t vec_idx = 0; vec_idx < size; ++vec_idx) {
-    //         output_file << this->lambda_shr()[party_idx][vec_idx] << ' '
-    //                     << this->lambda_shr_mac()[party_idx][vec_idx] << '\n';
-    //     }
-    //     output_file << '\n';
-    // }
-
-    this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    // this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr_mac());
 }
 
 

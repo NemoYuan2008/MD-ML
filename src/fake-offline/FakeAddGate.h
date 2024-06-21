@@ -55,7 +55,8 @@ void FakeAddGate<ShrType, N>::doRunOffline() {
     }
 
     // Write the lambda values to the output files, a share is followed by its MAC
-    this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr_mac());
 }
 
 } // namespace md_ml

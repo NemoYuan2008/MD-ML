@@ -25,9 +25,9 @@ std::vector<T> matrixAdd(const std::vector<T>& x, const std::vector<T>& y) {
     // so we detect it using macros to avoid compilation errors on macOS.
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
     std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::plus<T>());
-#else // !_LIBCPP_HAS_NO_INCOMPLETE_PSTL
-    std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::plus<T>(), std::execution::par_unseq);
-#endif // _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), y.begin(), output.begin(), std::plus<T>());
+#endif
 
     return output;
 }
@@ -38,9 +38,9 @@ inline
 void matrixAddAssign(std::vector<T>& x, const std::vector<T>& y) {
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
     std::transform(x.begin(), x.end(), y.begin(), x.begin(), std::plus<T>());
-#else // !_LIBCPP_HAS_NO_INCOMPLETE_PSTL
-    std::transform(x.begin(), x.end(), y.begin(), x.begin(), std::plus<T>(), std::execution::par_unseq);
-#endif // _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), y.begin(), x.begin(), std::plus<T>());
+#endif
 }
 
 
@@ -51,9 +51,9 @@ std::vector<T> matrixSubtract(const std::vector<T>& x, const std::vector<T>& y) 
 
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
     std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::minus<T>());
-#else // !_LIBCPP_HAS_NO_INCOMPLETE_PSTL
-    std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::minus<T>(), std::execution::par_unseq);
-#endif // _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), y.begin(), output.begin(), std::minus<T>());
+#endif
 
     return output;
 }
@@ -64,9 +64,9 @@ inline
 void matrixSubtractAssign(std::vector<T>& x, const std::vector<T>& y) {
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
     std::transform(x.begin(), x.end(), y.begin(), x.begin(), std::minus<T>());
-#else // !_LIBCPP_HAS_NO_INCOMPLETE_PSTL
-    std::transform(x.begin(), x.end(), y.begin(), x.begin(), std::minus<T>(), std::execution::par_unseq);
-#endif // _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), y.begin(), x.begin(), std::minus<T>());
+#endif
 }
 
 

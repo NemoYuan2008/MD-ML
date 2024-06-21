@@ -1,7 +1,7 @@
 // By Boshi Yuan
 
-#ifndef FAKEGATE_H
-#define FAKEGATE_H
+#ifndef MD_ML_FAKEGATE_H
+#define MD_ML_FAKEGATE_H
 
 #include <memory>
 #include <vector>
@@ -32,7 +32,7 @@ public:
 
     void runOffline();
 
-    [[nodiscard]] bool isEvaluatedOffline() const { return evaluated_offline_; }
+    // [[nodiscard]] bool isEvaluatedOffline() const { return evaluated_offline_; }
 
     [[nodiscard]] const auto& input_x() const { return input_x_; }
 
@@ -89,12 +89,12 @@ private:
 
 template <IsSpdz2kShare ShrType, std::size_t N>
 void FakeGate<ShrType, N>::runOffline() {
-    if (this->isEvaluatedOffline())
+    if (this->evaluated_offline_)
         return;
 
-    if (input_x_ && !input_x_->isEvaluatedOffline())
+    if (input_x_ && !input_x_->evaluated_offline_)
         input_x_->runOffline();
-    if (input_y_ && !input_y_->isEvaluatedOffline())
+    if (input_y_ && !input_y_->evaluated_offline_)
         input_y_->runOffline();
 
     this->doRunOffline();
@@ -104,4 +104,4 @@ void FakeGate<ShrType, N>::runOffline() {
 
 } // namespace md_ml
 
-#endif //FAKEGATE_H
+#endif //MD_ML_FAKEGATE_H

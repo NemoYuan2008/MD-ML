@@ -61,15 +61,17 @@ public:
 
     AllPartiesSharesVec GenerateAllPartiesShares(const std::vector<ClearType>& value) const;
 
-    void WriteSharesToAllParites(const std::array<std::vector<SemiShrType>, N>& shares,
-                                 const std::array<std::vector<SemiShrType>, N>& macs);
+    // void WriteSharesToAllParites(const std::array<std::vector<SemiShrType>, N>& shares,
+    //                              const std::array<std::vector<SemiShrType>, N>& macs);
+
+    void WriteSharesToAllParites(const std::array<std::vector<SemiShrType>, N>& shares);
 
     void WriteClearToIthParty(const std::vector<ClearType>& values, std::size_t party_id);
 
     void WriteClearToAllParties(const std::vector<ClearType>& values);
 
 private:
-    inline static const std::filesystem::path kFakeOfflinePath{FAKE_OFFLINE_DIR}; // The macro is in CMakeLists.txt
+    inline static const std::filesystem::path kFakeOfflineDir{FAKE_OFFLINE_DIR}; // The macro is in CMakeLists.txt
     GlobalKeyType global_key_;
     std::array<KeyShrType, N> key_shares_;
     std::array<std::ofstream, N> output_files_;
@@ -79,13 +81,13 @@ private:
 template <IsSpdz2kShare ShrType, std::size_t N>
 FakeParty<ShrType, N>::FakeParty(const std::string& job_name) {
     // Open the output files for each party
-    if (!exists(kFakeOfflinePath)) {
-        create_directory(kFakeOfflinePath);
+    if (!exists(kFakeOfflineDir)) {
+        create_directory(kFakeOfflineDir);
     }
     const std::string file_name_suffix = job_name + (job_name.empty() ? "party-" : "-party-");
     for (std::size_t i = 0; i < N; ++i) {
         std::string current_file_name = file_name_suffix + std::to_string(i) + ".txt";
-        output_files_[i].open(kFakeOfflinePath / current_file_name);
+        output_files_[i].open(kFakeOfflineDir / current_file_name);
     }
 
     // Generate the MAC key
@@ -155,17 +157,27 @@ GenerateAllPartiesShares(const std::vector<ClearType>& value) const {
 }
 
 
+// template <IsSpdz2kShare ShrType, std::size_t N>
+// void FakeParty<ShrType, N>::WriteSharesToAllParites(const std::array<std::vector<SemiShrType>, N>& shares,
+//                                                     const std::array<std::vector<SemiShrType>, N>& macs) {
+//     for (std::size_t party_idx = 0; party_idx < N; ++party_idx) {
+//         auto& output_file = ithPartyFile(party_idx);
+//
+//         for (std::size_t vec_idx = 0; vec_idx < shares[party_idx].size(); ++vec_idx) {
+//             output_file << shares[party_idx][vec_idx] << ' ' << macs[party_idx][vec_idx] << '\n';
+//         }
+//     }
+// }
+
+
 template <IsSpdz2kShare ShrType, std::size_t N>
-void FakeParty<ShrType, N>::WriteSharesToAllParites(const std::array<std::vector<SemiShrType>, N>& shares,
-                                                    const std::array<std::vector<SemiShrType>, N>& macs) {
+void FakeParty<ShrType, N>::WriteSharesToAllParites(const std::array<std::vector<SemiShrType>, N>& shares) {
     for (std::size_t party_idx = 0; party_idx < N; ++party_idx) {
         auto& output_file = ithPartyFile(party_idx);
-
-        for (std::size_t vec_idx = 0; vec_idx < shares[party_idx].size(); ++vec_idx) {
-            output_file << shares[party_idx][vec_idx] << ' ' << macs[party_idx][vec_idx] << '\n';
-        }
+        std::ranges::for_each(shares[party_idx], [&output_file](auto share) { output_file << share << '\n'; });
     }
 }
+
 
 template <IsSpdz2kShare ShrType, std::size_t N>
 void FakeParty<ShrType, N>::WriteClearToIthParty(const std::vector<ClearType>& values, std::size_t party_id) {

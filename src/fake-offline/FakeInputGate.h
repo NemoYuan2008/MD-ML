@@ -1,7 +1,7 @@
 // By Boshi Yuan
 
-#ifndef FAKEINPUTGATE_H
-#define FAKEINPUTGATE_H
+#ifndef MD_ML_FAKEINPUTGATE_H
+#define MD_ML_FAKEINPUTGATE_H
 
 #include <algorithm>
 
@@ -40,37 +40,6 @@ template <IsSpdz2kShare ShrType, std::size_t N>
 void FakeInputGate<ShrType, N>::doRunOffline() {
     auto size = this->dim_row() * this->dim_col();
 
-    // this->lambda_clear().resize(size);
-    // std::ranges::for_each(this->lambda_shr(), [size](auto& vec) { vec.resize(size); });
-    // std::ranges::for_each(this->lambda_shr_mac(), [size](auto& vec) { vec.resize(size); });
-
-    // // Generate the shared lambda values for all parties
-    // for (std::size_t vec_idx = 0; vec_idx < size; ++vec_idx) {
-    //     auto lambda_clear_i = getRand<ClearType>(); // $\lambda$-values are uniformly random
-    //     this->lambda_clear()[vec_idx] = lambda_clear_i;
-    //
-    //     auto lambda_shares_i = this->fake_party().GenerateAllPartiesShares(lambda_clear_i);
-    //     for (std::size_t party_idx = 0; party_idx < N; ++party_idx) {
-    //         this->lambda_shr()[party_idx][vec_idx] = lambda_shares_i.value_shares[party_idx];
-    //         this->lambda_shr_mac()[party_idx][vec_idx] = lambda_shares_i.mac_shares[party_idx];
-    //     }
-    // }
-
-    // // Write the shared lambda values to the output files
-    // for (std::size_t party_idx = 0; party_idx < N; ++party_idx) {
-    //     auto& output_file = this->fake_party().ithPartyFile(party_idx);
-    //
-    //     for (std::size_t vec_idx = 0; vec_idx < size; ++vec_idx) {
-    //         if (party_idx == owner_id_) {
-    //             // The owner of the input should know lambda_clear
-    //             output_file << this->lambda_clear()[vec_idx] << ' ';
-    //         }
-    //
-    //         output_file << this->lambda_shr()[party_idx][vec_idx] << ' '
-    //             << this->lambda_shr_mac()[party_idx][vec_idx] << '\n';
-    //     }
-    // }
-
     // $[\lambda]$-values are uniformly random
     this->lambda_clear().resize(size);
     std::ranges::generate(this->lambda_clear(), getRand<ClearType>);
@@ -82,10 +51,12 @@ void FakeInputGate<ShrType, N>::doRunOffline() {
 
     // Write the values to the output files
     this->fake_party().WriteClearToIthParty(this->lambda_clear(), owner_id_); // Owner should know lambda_clear
-    this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    // this->fake_party().WriteSharesToAllParites(this->lambda_shr(), this->lambda_shr_mac());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr());
+    this->fake_party().WriteSharesToAllParites(this->lambda_shr_mac());
 }
 
 
 } // namespace md_ml
 
-#endif //FAKEINPUTGATE_H
+#endif //MD_ML_FAKEINPUTGATE_H

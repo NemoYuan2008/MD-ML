@@ -13,18 +13,18 @@ using namespace md_ml;
 
 int main() {
     using ShrType = Spdz2kShare64;
-    using ClearType = ShrType::ClearType;
 
     FakeParty<ShrType, 2> party("ResNet-18");
     FakeCircuit<ShrType, 2> circuit(party);
 
-    auto a = circuit.input(0, 1, 1);
-    auto b = circuit.input(1, 1, 1);
-    // auto c = circuit.add(a, b);
+    auto a = circuit.input(0, 1, 5);
+    auto b = circuit.input(0, 1, 5);
+    auto c = circuit.add(a, b);
+    auto d = circuit.output(c);
     // auto d = circuit.subtract(c, a);
-    auto e = circuit.multiply(a, b);
+    // auto e = circuit.multiply(a, b);
 
-    circuit.addEndpoint(e);
+    circuit.addEndpoint(d);
     circuit.runOffline();
 
     return 0;

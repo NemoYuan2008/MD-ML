@@ -29,16 +29,25 @@ set(SRC_FAKE_OFFLINE
         src/fake-offline/FakeAddGate.h
         src/fake-offline/FakeSubtractGate.h
         src/fake-offline/FakeMultiplyGate.h
+        src/fake-offline/FakeOutputGate.h
 )
 
 set(SRC_UTILS
         src/utils/rand.h
-        src/utils/uint128_IO.h
+        src/utils/uint128_io.h
         src/utils/linear_algebra.h
+        src/utils/print_vector.h
 )
 
 set(SRC_PROTOCOLS
         src/protocols/Gate.h
+        src/protocols/PartyWithFakeOffline.h
+        src/protocols/AddGate.h
+        src/protocols/InputGate.h
+        src/protocols/OutputGate.h
+        src/protocols/Circuit.h
+        src/protocols/MultiplyGate.h
+        src/protocols/SubtractGate.h
 )
 
 set(SRC_FILES
@@ -50,6 +59,15 @@ set(SRC_FILES
 
 
 add_executable(test test.cpp ${SRC_FILES})
-
 target_include_directories(test PRIVATE src)
 target_link_libraries(test Eigen3::Eigen)
+
+add_executable(party1 party1.cpp)
+target_include_directories(party1 PRIVATE src)
+target_link_libraries(party1 Eigen3::Eigen md-ml-networking)
+
+add_executable(party2 party2.cpp)
+target_include_directories(party2 PRIVATE src)
+target_link_libraries(party2 Eigen3::Eigen md-ml-networking)
+
+add_compile_definitions(MD_ML_DEBUG_ASIO)

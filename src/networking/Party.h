@@ -13,13 +13,15 @@
 
 #include <boost/asio.hpp>
 
+#include "utils/uint128_io.h"
+
 
 namespace md_ml {
 
 
 class Party {
 public:
-    Party(std::size_t p_my_id, std::size_t p_port, std::size_t p_num_parties);
+    Party(std::size_t p_my_id, std::size_t p_num_parties, std::size_t p_port);
 
     Party(const Party&) = delete;
     Party& operator=(const Party&) = delete;
@@ -42,6 +44,12 @@ public:
     template <std::integral T>
     std::vector<T> ReceiveVec(std::size_t from_id, std::size_t num_elements);
 
+    template <std::integral T>
+    void SendVecToOther(const std::vector<T>& message);
+
+    template <std::integral T>
+    std::vector<T> ReceiveVecFromOther(std::size_t num_elements);
+
     [[nodiscard]] std::size_t my_id() const { return my_id_; }
 
 private:
@@ -57,8 +65,8 @@ private:
     static constexpr int kRetryAfterSeconds = 2;
 
     std::size_t my_id_;
-    std::size_t port_base_;
     std::size_t num_parties_;
+    std::size_t port_base_;
 
     boost::asio::io_context io_context_;
     std::vector<boost::asio::ip::tcp::socket> send_sockets_;
@@ -140,6 +148,17 @@ std::vector<T> Party::ReceiveVec(std::size_t from_id, std::size_t num_elements) 
 #endif
 
     return message;
+}
+
+
+template <std::integral T>
+void Party::SendVecToOther(const std::vector<T>& message) {
+    SendVec(1 - this->my_id(), message);
+}
+
+template <std::integral T>
+std::vector<T> Party::ReceiveVecFromOther(std::size_t num_elements) {
+    return ReceiveVec<T>(1 - this->my_id(), num_elements);
 }
 
 

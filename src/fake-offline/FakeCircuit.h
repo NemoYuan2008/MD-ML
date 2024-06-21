@@ -15,6 +15,7 @@
 #include "fake-offline/FakeAddGate.h"
 #include "fake-offline/FakeSubtractGate.h"
 #include "fake-offline/FakeMultiplyGate.h"
+#include "fake-offline/FakeOutputGate.h"
 
 
 namespace md_ml {
@@ -39,7 +40,7 @@ public:
     }
 
     std::shared_ptr<FakeInputGate<ShrType, N>>
-    input(int owner_id = 0, std::size_t dim_row = 1, std::size_t dim_col = 1) {
+    input(std::size_t owner_id = 0, std::size_t dim_row = 1, std::size_t dim_col = 1) {
         auto gate = std::make_shared<FakeInputGate<ShrType, N>>(fake_party_, dim_row, dim_col, owner_id);
         gates_.push_back(gate);
         return gate;
@@ -66,6 +67,14 @@ public:
              const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
         auto gate = std::make_shared<FakeMultiplyGate<ShrType, N>>(input_x, input_y);
         gates_.push_back(gate);
+        return gate;
+    }
+
+    std::shared_ptr<FakeOutputGate<ShrType, N>>
+    output(const std::shared_ptr<FakeGate<ShrType, N>>& input_x) {
+        auto gate = std::make_shared<FakeOutputGate<ShrType, N>>(input_x);
+        gates_.push_back(gate);
+        // TODO: shall we add the output gate to the endpoints?
         return gate;
     }
 
