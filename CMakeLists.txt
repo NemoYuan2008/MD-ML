@@ -4,12 +4,16 @@ project(MD-ML)
 set(CMAKE_CXX_STANDARD 20)
 
 find_package(Eigen3 REQUIRED)
-include_directories(src ${EIGEN3_INCLUDE_DIR})
+find_package(Boost REQUIRED system)
+
+include_directories(src ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 # Create a directory for fake offline data, and pass it to the compiler
 set(FAKE_OFFLINE_DIR ${PROJECT_SOURCE_DIR}/fake-offline-data)
 file(MAKE_DIRECTORY ${FAKE_OFFLINE_DIR})
 add_compile_definitions(FAKE_OFFLINE_DIR="${FAKE_OFFLINE_DIR}")
+
+add_subdirectory(src/networking)
 
 set(SRC_SHARE
         src/share/Spdz2kShare.h
@@ -33,11 +37,17 @@ set(SRC_UTILS
         src/utils/linear_algebra.h
 )
 
+set(SRC_PROTOCOLS
+        src/protocols/Gate.h
+)
+
 set(SRC_FILES
         ${SRC_SHARE}
         ${SRC_FAKE_OFFLINE}
+        ${SRC_PROTOCOLS}
         ${SRC_UTILS}
 )
+
 
 add_executable(test test.cpp ${SRC_FILES})
 

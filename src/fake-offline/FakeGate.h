@@ -24,8 +24,8 @@ public:
     FakeGate(FakeParty<ShrType, N>& p_fake_party, std::size_t p_dim_row, std::size_t p_dim_col)
         : fake_party_(p_fake_party), dim_row_(p_dim_row), dim_col_(p_dim_col) {}
 
-    FakeGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
-             const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y)
+    FakeGate(const std::shared_ptr<FakeGate>& p_input_x,
+             const std::shared_ptr<FakeGate>& p_input_y)
         : fake_party_(p_input_x->fake_party_), input_x_(p_input_x), input_y_(p_input_y) {}
 
     virtual ~FakeGate() = default;
@@ -39,6 +39,7 @@ public:
     [[nodiscard]] const auto& input_y() const { return input_y_; }
 
     [[nodiscard]] auto dim_row() const { return dim_row_; }
+
     [[nodiscard]] auto dim_col() const { return dim_col_; }
 
     [[nodiscard]] auto& fake_party() { return fake_party_; }
