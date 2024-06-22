@@ -37,8 +37,7 @@ set(SRC_UTILS
         src/utils/uint128_io.h
         src/utils/linear_algebra.h
         src/utils/print_vector.h
-        src/utils/Timer.h
-        src/utils/Timer.cpp
+        src/utils/fixed_point.h
 )
 
 set(SRC_PROTOCOLS
@@ -60,18 +59,25 @@ set(SRC_FILES
 )
 
 
+set(SRC_TIMER
+        src/utils/Timer.h
+        src/utils/Timer.cpp)
+add_library(md-ml-timer ${SRC_TIMER})
+
+
 add_executable(test test.cpp ${SRC_FILES})
 target_include_directories(test PRIVATE src)
 target_link_libraries(test Eigen3::Eigen)
 
 add_executable(party0 party0.cpp ${SRC_FILES})
 target_include_directories(party0 PRIVATE src)
-target_link_libraries(party0 Eigen3::Eigen md-ml-networking)
+target_link_libraries(party0 Eigen3::Eigen md-ml-networking md-ml-timer)
 
 add_executable(party1 party1.cpp ${SRC_FILES})
 target_include_directories(party1 PRIVATE src)
-target_link_libraries(party1 Eigen3::Eigen md-ml-networking)
+target_link_libraries(party1 Eigen3::Eigen md-ml-networking md-ml-timer)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(MD_ML_DEBUG)
     add_compile_definitions(MD_ML_DEBUG_ASIO)
 endif ()
