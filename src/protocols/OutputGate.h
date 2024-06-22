@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <thread>
+#include <utils/print_vector.h>
 
 #include "protocols/Gate.h"
 #include "share/IsSpdz2kShare.h"
@@ -48,6 +49,9 @@ void OutputGate<ShrType>::doReadOfflineFromFile() {} // Do nothing
 template <IsSpdz2kShare ShrType>
 void OutputGate<ShrType>::doRunOnline() {
     auto size = this->dim_row() * this->dim_col();
+
+    // std::cerr << "Delta_clear:" << '\n';
+    // PrintVector(this->input_x()->Delta_clear());
 
     std::thread t1([this] {
         this->party().SendVecToOther(this->input_x()->lambda_shr());

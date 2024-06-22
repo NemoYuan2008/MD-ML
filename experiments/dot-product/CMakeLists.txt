@@ -1,0 +1,7 @@
+add_executable(dot_product_party_0 dot_product_party_0.cpp dot_product_config.h)
+add_executable(dot_product_party_1 dot_product_party_1.cpp dot_product_config.h)
+add_executable(dot_product_fake_offline dot_product_fake_offline.cpp dot_product_config.h)
+
+target_link_libraries(dot_product_party_0 ${ONLINE_LIB})
+target_link_libraries(dot_product_party_1 ${ONLINE_LIB})
+target_link_libraries(dot_product_fake_offline ${FAKE_OFFLINE_LIB})

@@ -16,6 +16,7 @@
 #include "fake-offline/FakeSubtractGate.h"
 #include "fake-offline/FakeMultiplyGate.h"
 #include "fake-offline/FakeOutputGate.h"
+#include "fake-offline/FakeMultiplyTruncGate.h"
 
 
 namespace md_ml {
@@ -29,54 +30,31 @@ class FakeCircuit {
 public:
     explicit FakeCircuit(FakeParty<ShrType, N>& p_fake_party) : fake_party_(p_fake_party) {}
 
-    void runOffline() {
-        for (const auto& gatePtr : endpoints_) {
-            gatePtr->runOffline();
-        }
-    }
+    void runOffline();
 
-    void addEndpoint(const std::shared_ptr<FakeGate<ShrType, N>> &gate) {
-        endpoints_.push_back(gate);
-    }
+    void addEndpoint(const std::shared_ptr<FakeGate<ShrType, N>>& gate);
 
     std::shared_ptr<FakeInputGate<ShrType, N>>
-    input(std::size_t owner_id = 0, std::size_t dim_row = 1, std::size_t dim_col = 1) {
-        auto gate = std::make_shared<FakeInputGate<ShrType, N>>(fake_party_, dim_row, dim_col, owner_id);
-        gates_.push_back(gate);
-        return gate;
-    }
+    input(std::size_t owner_id, std::size_t dim_row, std::size_t dim_col);
 
     std::shared_ptr<FakeAddGate<ShrType, N>>
     add(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
-        const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
-        auto gate = std::make_shared<FakeAddGate<ShrType, N>>(input_x, input_y);
-        gates_.push_back(gate);
-        return gate;
-    }
+        const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
 
     std::shared_ptr<FakeSubtractGate<ShrType, N>>
     subtract(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
-             const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
-        auto gate = std::make_shared<FakeSubtractGate<ShrType, N>>(input_x, input_y);
-        gates_.push_back(gate);
-        return gate;
-    }
+             const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
 
     std::shared_ptr<FakeMultiplyGate<ShrType, N>>
     multiply(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
-             const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
-        auto gate = std::make_shared<FakeMultiplyGate<ShrType, N>>(input_x, input_y);
-        gates_.push_back(gate);
-        return gate;
-    }
+             const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
 
     std::shared_ptr<FakeOutputGate<ShrType, N>>
-    output(const std::shared_ptr<FakeGate<ShrType, N>>& input_x) {
-        auto gate = std::make_shared<FakeOutputGate<ShrType, N>>(input_x);
-        gates_.push_back(gate);
-        // TODO: shall we add the output gate to the endpoints?
-        return gate;
-    }
+    output(const std::shared_ptr<FakeGate<ShrType, N>>& input_x);
+
+    std::shared_ptr<FakeMultiplyTruncGate<ShrType, N>>
+    multiplyTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+                  const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
 
 private:
     FakeParty<ShrType, N>& fake_party_;
@@ -84,6 +62,73 @@ private:
     std::vector<std::shared_ptr<FakeGate<ShrType, N>>> endpoints_;
 };
 
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+void FakeCircuit<ShrType, N>::
+runOffline() {
+    for (const auto& gatePtr : endpoints_) {
+        gatePtr->runOffline();
+    }
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+void FakeCircuit<ShrType, N>::
+addEndpoint(const std::shared_ptr<FakeGate<ShrType, N>>& gate) {
+    endpoints_.push_back(gate);
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeInputGate<ShrType, N>> FakeCircuit<ShrType, N>::
+input(std::size_t owner_id, std::size_t dim_row, std::size_t dim_col) {
+    auto gate = std::make_shared<FakeInputGate<ShrType, N>>(fake_party_, dim_row, dim_col, owner_id);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeAddGate<ShrType, N>> FakeCircuit<ShrType, N>::
+add(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+    const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
+    auto gate = std::make_shared<FakeAddGate<ShrType, N>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeSubtractGate<ShrType, N>> FakeCircuit<ShrType, N>::
+subtract(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+         const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
+    auto gate = std::make_shared<FakeSubtractGate<ShrType, N>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeMultiplyGate<ShrType, N>> FakeCircuit<ShrType, N>::
+multiply(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+         const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
+    auto gate = std::make_shared<FakeMultiplyGate<ShrType, N>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeOutputGate<ShrType, N>> FakeCircuit<ShrType, N>::
+output(const std::shared_ptr<FakeGate<ShrType, N>>& input_x) {
+    auto gate = std::make_shared<FakeOutputGate<ShrType, N>>(input_x);
+    gates_.push_back(gate);
+    // TODO: shall we add the output gate to the endpoints?
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeMultiplyTruncGate<ShrType, N>> FakeCircuit<ShrType, N>::
+multiplyTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+              const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
+    auto gate = std::make_shared<FakeMultiplyTruncGate<ShrType, N>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
 
 } // namespace md_ml
 

@@ -17,9 +17,9 @@ int main() {
     FakeParty<ShrType, 2> party("ResNet-18");
     FakeCircuit<ShrType, 2> circuit(party);
 
-    auto a = circuit.input(0, 1, 65536);
-    auto b = circuit.input(0, 65536, 1);
-    auto c = circuit.multiply(a, b);
+    auto a = circuit.input(0, 1, 1);
+    auto b = circuit.input(0, 1, 1);
+    auto c = circuit.multiplyTrunc(a, b);
     auto d = circuit.output(c);
 
     circuit.addEndpoint(d);

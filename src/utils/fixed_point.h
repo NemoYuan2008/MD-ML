@@ -7,9 +7,20 @@
 #include <type_traits>
 #include <vector>
 #include <algorithm>
+#include <execution>
 
 
 namespace md_ml {
+
+
+template <typename Tp>
+Tp truncateClear(Tp x);
+
+template <typename Tp>
+std::vector<Tp> truncateClearVec(const std::vector<Tp>& x);
+
+template <typename Tp>
+void truncateClearVecInplace(std::vector<Tp>& x);
 
 template <typename ClearType>
 ClearType double2fix(double x);
@@ -25,8 +36,34 @@ std::vector<double> fix2doubleVec(const std::vector<ClearType>& x);
 
 
 namespace FixedPoint {
-    const int fractionBits = 20;
-    const int truncateValue = 1 << fractionBits;
+    constexpr int fractionBits = 16;
+    constexpr int truncateValue = 1 << fractionBits;
+}
+
+
+template <typename Tp>
+Tp truncateClear(Tp x) {
+    return x >> FixedPoint::fractionBits;
+}
+
+template <typename Tp>
+std::vector<Tp> truncateClearVec(const std::vector<Tp>& x) {
+    std::vector<Tp> ret(x.size());
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(x.begin(), x.end(), ret.begin(), truncateClear<Tp>);
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), ret.begin(), truncateClear<Tp>);
+#endif
+    return ret;
+}
+
+template <typename Tp>
+void truncateClearVecInplace(std::vector<Tp>& x) {
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(x.begin(), x.end(), x.begin(), truncateClear<Tp>);
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), x.begin(), truncateClear<Tp>);
+#endif
 }
 
 

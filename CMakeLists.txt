@@ -13,6 +13,12 @@ set(FAKE_OFFLINE_DIR "${PROJECT_SOURCE_DIR}/fake-offline-data")
 file(MAKE_DIRECTORY ${FAKE_OFFLINE_DIR})
 add_compile_definitions(FAKE_OFFLINE_DIR="${FAKE_OFFLINE_DIR}")
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(MD_ML_DEBUG)
+    add_compile_definitions(MD_ML_DEBUG_ASIO)
+endif ()
+
+
 add_subdirectory(src/networking)
 
 set(SRC_SHARE
@@ -30,6 +36,8 @@ set(SRC_FAKE_OFFLINE
         src/fake-offline/FakeSubtractGate.h
         src/fake-offline/FakeMultiplyGate.h
         src/fake-offline/FakeOutputGate.h
+        src/fake-offline/FakeMultiplyTruncGate.h
+        src/fake-offline/FakeConv2DGate.h
 )
 
 set(SRC_UTILS
@@ -38,6 +46,7 @@ set(SRC_UTILS
         src/utils/linear_algebra.h
         src/utils/print_vector.h
         src/utils/fixed_point.h
+        src/utils/tensor.h
 )
 
 set(SRC_PROTOCOLS
@@ -49,6 +58,7 @@ set(SRC_PROTOCOLS
         src/protocols/Circuit.h
         src/protocols/MultiplyGate.h
         src/protocols/SubtractGate.h
+        src/protocols/MultiplyTruncGate.h
 )
 
 set(SRC_FILES
@@ -65,19 +75,16 @@ set(SRC_TIMER
 add_library(md-ml-timer ${SRC_TIMER})
 
 
-add_executable(test test.cpp ${SRC_FILES})
-target_include_directories(test PRIVATE src)
-target_link_libraries(test Eigen3::Eigen)
+set(ONLINE_LIB
+        Eigen3::Eigen
+        md-ml-networking
+        md-ml-timer
+)
 
-add_executable(party0 party0.cpp ${SRC_FILES})
-target_include_directories(party0 PRIVATE src)
-target_link_libraries(party0 Eigen3::Eigen md-ml-networking md-ml-timer)
+set(FAKE_OFFLINE_LIB
+        Eigen3::Eigen
+)
 
-add_executable(party1 party1.cpp ${SRC_FILES})
-target_include_directories(party1 PRIVATE src)
-target_link_libraries(party1 Eigen3::Eigen md-ml-networking md-ml-timer)
+add_subdirectory(experiments)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_definitions(MD_ML_DEBUG)
-    add_compile_definitions(MD_ML_DEBUG_ASIO)
-endif ()
+add_executable(dummy dummy.cpp ${SRC_FILES})

@@ -16,6 +16,7 @@
 #include "protocols/SubtractGate.h"
 #include "protocols/MultiplyGate.h"
 #include "protocols/OutputGate.h"
+#include "protocols/MultiplyTruncGate.h"
 
 namespace md_ml {
 
@@ -45,6 +46,9 @@ public:
 
     std::shared_ptr<OutputGate<ShrType>>
     output(const std::shared_ptr<Gate<ShrType>>& input);
+
+    std::shared_ptr<MultiplyTruncGate<ShrType>>
+    multiplyTrunc(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
 
 private:
     PartyWithFakeOffline<ShrType>& party_;
@@ -132,6 +136,15 @@ template <typename ShrType>
 std::shared_ptr<OutputGate<ShrType>> Circuit<ShrType>::
 output(const std::shared_ptr<Gate<ShrType>>& input) {
     auto gate = std::make_shared<OutputGate<ShrType>>(input);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <typename ShrType>
+std::shared_ptr<MultiplyTruncGate<ShrType>> Circuit<ShrType>::
+multiplyTrunc(const std::shared_ptr<Gate<ShrType>>& input_x,
+              const std::shared_ptr<Gate<ShrType>>& input_y) {
+    auto gate = std::make_shared<MultiplyTruncGate<ShrType>>(input_x, input_y);
     gates_.push_back(gate);
     return gate;
 }

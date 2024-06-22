@@ -5,6 +5,10 @@
 #define MD_ML_SPDZ2KSHARE_H
 
 #include <cstddef>
+#include <vector>
+#include <algorithm>
+#include <execution>
+
 #include "Mod2PowN.h"
 
 
@@ -29,10 +33,54 @@ public:
 
     constexpr static std::size_t kBits = K;
     constexpr static std::size_t sBits = S;
+
+    static SemiShrType RemoveUpperBits(SemiShrType value);
+    static std::vector<SemiShrType> RemoveUpperBits(const std::vector<SemiShrType>& values);
+    static void RemoveUpperBitsInplace(std::vector<SemiShrType>& values);
 };
 
 using Spdz2kShare32 = Spdz2kShare<32, 32>;
 using Spdz2kShare64 = Spdz2kShare<64, 64>;
+
+
+template <std::size_t K, std::size_t S>
+typename Spdz2kShare<K, S>::SemiShrType Spdz2kShare<K, S>::
+RemoveUpperBits(SemiShrType value) {
+    return (value << S) >> S;
+}
+
+
+template <std::size_t K, std::size_t S>
+std::vector<typename Spdz2kShare<K, S>::SemiShrType> Spdz2kShare<K, S>::
+RemoveUpperBits(const std::vector<SemiShrType>& values) {
+    std::vector<SemiShrType> ret(values.size());
+
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(values.begin(), values.end(), ret.begin(),
+                   [](SemiShrType value) { return RemoveUpperBits(value); });
+#else
+    std::transform(std::execution::par_unseq,
+                   values.begin(), values.end(), ret.begin(),
+                   [](SemiShrType value) { return RemoveUpperBits(value); });
+#endif
+
+    return ret;
+}
+
+
+template <std::size_t K, std::size_t S>
+void Spdz2kShare<K, S>::
+RemoveUpperBitsInplace(std::vector<SemiShrType>& values) {
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(values.begin(), values.end(), values.begin(),
+                   [](SemiShrType value) { return RemoveUpperBits(value); });
+#else
+    std::transform(std::execution::par_unseq,
+                   values.begin(), values.end(), values.begin(),
+                   [](SemiShrType value) { return RemoveUpperBits(value); });
+#endif
+}
+
 
 } // namespace md_ml
 

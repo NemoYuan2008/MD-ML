@@ -1,8 +1,7 @@
 // By Boshi Yuan
 
-#ifndef MD_ML_FAKEMULTIPLYGATE_H
-#define MD_ML_FAKEMULTIPLYGATE_H
-
+#ifndef MD_ML_FAKECONV2DGATE_H
+#define MD_ML_FAKECONV2DGATE_H
 
 #include <memory>
 #include <vector>
@@ -11,6 +10,7 @@
 #include <stdexcept>
 
 #include "utils/linear_algebra.h"
+#include "utils/tensor.h"
 #include "share/IsSpdz2kShare.h"
 #include "fake-offline/FakeGate.h"
 
@@ -19,60 +19,57 @@ namespace md_ml {
 
 
 template <IsSpdz2kShare ShrType, std::size_t N>
-class FakeMultiplyGate : public FakeGate<ShrType, N> {
+class FakeConv2DGate : public FakeGate<ShrType, N> {
 public:
     using SemiShrType = typename ShrType::SemiShrType;
     using ClearType = typename ShrType::ClearType;
 
-    FakeMultiplyGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
-                     const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y);
-
-    [[nodiscard]] auto dim_mid() const { return dim_mid_; }
+    /// @brief
+    /// @param p_input_x: The input tensor
+    /// @param p_input_y: The kernel tensor
+    FakeConv2DGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
+                   const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y,
+                   const Conv2DOp& op);
 
 protected:
     void doRunOffline() override;
 
 private:
-    std::size_t dim_mid_;
+    Conv2DOp convOp;
 };
 
 
 template <IsSpdz2kShare ShrType, std::size_t N>
-FakeMultiplyGate<ShrType, N>::
-FakeMultiplyGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
-                 const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y)
-    : FakeGate<ShrType, N>(p_input_x, p_input_y), dim_mid_(p_input_x->dim_col()) {
-    // Check and set dimensions
-    if (p_input_x->dim_col() != p_input_y->dim_row()) {
-        throw std::invalid_argument("The inputs of multiplication gate should have compatible dimensions");
-    }
-
-    this->set_dim_row(p_input_x->dim_row());
-    this->set_dim_col(p_input_y->dim_col());
-    // dim_mid_ was set in the initializer list
+FakeConv2DGate<ShrType, N>::
+FakeConv2DGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
+               const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y,
+               const Conv2DOp& op)
+    : FakeGate<ShrType, N>(p_input_x, p_input_y), convOp(op) {
+    this->dimRow = convOp.compute_output_size();
+    this->dimCol = 1;
 }
 
 
 template <IsSpdz2kShare ShrType, std::size_t N>
-void FakeMultiplyGate<ShrType, N>::doRunOffline() {
-    auto size_lhs = this->dim_row() * this->dim_mid();
-    auto size_rhs = this->dim_mid() * this->dim_col();
-    auto size_output = this->dim_row() * this->dim_col();
+void FakeConv2DGate<ShrType, N>::doRunOffline() {
+    auto size_lhs = convOp.compute_input_size();
+    auto size_rhs = convOp.compute_kernel_size();
+    auto size_output = convOp.compute_output_size();
 
     // $\lambda_z$ = rand()
     this->lambda_clear().resize(size_output);
     std::ranges::generate(this->lambda_clear(), getRand<ClearType>);
 
-    auto lambda_shares_and_macs = this->fake_party().GenerateAllPartiesShares(this->lambda_clear());
-    this->lambda_shr() = std::move(lambda_shares_and_macs.value_shares);
-    this->lambda_shr_mac() = std::move(lambda_shares_and_macs.mac_shares);
+    auto lambda_share_and_macs = this->fake_party().GenerateAllPartiesShares(this->lambda_clear());
+    this->lambda_shr() = std::move(lambda_share_and_macs.value_shares);
+    this->lambda_shr_mac() = std::move(lambda_share_and_macs.mac_shares);
 
-    // Generate the multiplication triples
+    // Generate the convolution triples
     std::vector<ClearType> a_clear(size_lhs);
     std::vector<ClearType> b_clear(size_rhs);
     std::ranges::generate(a_clear, getRand<ClearType>);
     std::ranges::generate(b_clear, getRand<ClearType>);
-    auto c_clear = matrixMultiply(a_clear, b_clear, this->dim_row(), this->dim_mid(), this->dim_col());
+    auto c_clear = convolution(a_clear, b_clear, convOp);
 
     auto a_share_with_mac = this->fake_party().GenerateAllPartiesShares(a_clear);
     auto b_share_with_mac = this->fake_party().GenerateAllPartiesShares(b_clear);
@@ -96,7 +93,7 @@ void FakeMultiplyGate<ShrType, N>::doRunOffline() {
     this->fake_party().WriteClearToAllParties(delta_y_clear);
 }
 
-
 } // namespace md_ml
 
-#endif //MD_ML_FAKEMULTIPLYGATE_H
+
+#endif //MD_ML_FAKECONV2DGATE_H

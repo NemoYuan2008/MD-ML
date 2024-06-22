@@ -24,10 +24,11 @@ public:
 
     [[nodiscard]] std::size_t dim_mid() const { return dim_mid_; }
 
-private:
+protected:
     void doReadOfflineFromFile() override;
     void doRunOnline() override;
 
+private:
     std::size_t dim_mid_;
 
     std::vector<SemiShrType> a_shr_, a_shr_mac_;
@@ -112,13 +113,18 @@ void MultiplyGate<ShrType>::doRunOnline() {
     });
 
     std::thread t2([&, this] {
-        this->Delta_clear() = this->party().template ReceiveVecFromOther<SemiShrType>(this->dim_row() * this->dim_col());
+        this->Delta_clear() = this->party().template ReceiveVecFromOther<
+            SemiShrType>(this->dim_row() * this->dim_col());
     });
 
     t1.join();
     t2.join();
 
     matrixAddAssign(this->Delta_clear(), Delta_z_shr);
+
+    // Since Delta_clear is in ClearType but stored in SemiShrType, we need to remove the upper bits
+    // This is important since it affects the correctness in MultiplyTruncGate!!!
+    ShrType::RemoveUpperBitsInplace(this->Delta_clear());
 
     // free the spaces of preprocessing data
     a_shr_.clear();

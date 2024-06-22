@@ -23,7 +23,7 @@ std::vector<T> matrixAdd(const std::vector<T>& x, const std::vector<T>& y) {
     // Also, we can use std::execution::par_unseq to parallelize the computation
     // However, the parallelization is only available in libstdc++ (Linux), not available in libc++ (macOS),
     // so we detect it using macros to avoid compilation errors on macOS.
-#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL   // or !__cpp_lib_execution?
     std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::plus<T>());
 #else
     std::transform(std::execution::par_unseq, x.begin(), x.end(), y.begin(), output.begin(), std::plus<T>());

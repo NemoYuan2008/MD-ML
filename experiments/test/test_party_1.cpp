@@ -15,9 +15,9 @@ int main() {
     PartyWithFakeOffline<ShrType> party(1, 2, 5050, "ResNet-18");
     Circuit<ShrType> circuit(party);
 
-    auto a = circuit.input(0, 1, 65536);
-    auto b = circuit.input(0, 65536, 1);
-    auto c = circuit.multiply(a, b);
+    auto a = circuit.input(0, 1, 1);
+    auto b = circuit.input(0, 1, 1);
+    auto c = circuit.multiplyTrunc(a, b);
     auto d = circuit.output(c);
     circuit.addEndPoint(d);
 
