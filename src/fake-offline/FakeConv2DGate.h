@@ -45,8 +45,8 @@ FakeConv2DGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
                const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y,
                const Conv2DOp& op)
     : FakeGate<ShrType, N>(p_input_x, p_input_y), convOp(op) {
-    this->dimRow = convOp.compute_output_size();
-    this->dimCol = 1;
+    this->set_dim_row(convOp.compute_output_size());
+    this->set_dim_col(1);
 }
 
 

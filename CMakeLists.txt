@@ -59,6 +59,7 @@ set(SRC_PROTOCOLS
         src/protocols/MultiplyGate.h
         src/protocols/SubtractGate.h
         src/protocols/MultiplyTruncGate.h
+        src/protocols/Conv2DGate.h
 )
 
 set(SRC_FILES

@@ -17,6 +17,7 @@
 #include "fake-offline/FakeMultiplyGate.h"
 #include "fake-offline/FakeOutputGate.h"
 #include "fake-offline/FakeMultiplyTruncGate.h"
+#include "fake-offline/FakeConv2DGate.h"
 
 
 namespace md_ml {
@@ -55,6 +56,11 @@ public:
     std::shared_ptr<FakeMultiplyTruncGate<ShrType, N>>
     multiplyTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
                   const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
+
+    std::shared_ptr<FakeConv2DGate<ShrType, N>>
+    conv2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+           const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
+           const Conv2DOp& op);
 
 private:
     FakeParty<ShrType, N>& fake_party_;
@@ -126,6 +132,16 @@ std::shared_ptr<FakeMultiplyTruncGate<ShrType, N>> FakeCircuit<ShrType, N>::
 multiplyTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
               const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
     auto gate = std::make_shared<FakeMultiplyTruncGate<ShrType, N>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeConv2DGate<ShrType, N>> FakeCircuit<ShrType, N>::
+conv2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+       const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
+       const Conv2DOp& op) {
+    auto gate = std::make_shared<FakeConv2DGate<ShrType, N>>(input_x, input_y, op);
     gates_.push_back(gate);
     return gate;
 }

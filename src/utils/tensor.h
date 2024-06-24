@@ -29,19 +29,19 @@ struct TensorDimensions {
         return batch_size_ * num_channels_ * height_ * width_;
     }
 
-    bool operator==(const TensorDimensions &o) const noexcept {
+    bool operator==(const TensorDimensions& o) const noexcept {
         return batch_size_ == o.batch_size_ && num_channels_ == o.num_channels_ &&
-               height_ == o.height_ && width_ == o.width_;
+            height_ == o.height_ && width_ == o.width_;
     }
 
-    bool operator!=(const TensorDimensions &o) const noexcept { return !(*this == o); }
+    bool operator!=(const TensorDimensions& o) const noexcept { return !(*this == o); }
 };
 
 
 struct Conv2DOp {
-    std::array<std::size_t, 4> kernel_shape_;
-    std::array<std::size_t, 3> input_shape_;
-    std::array<std::size_t, 3> output_shape_;
+    std::array<std::size_t, 4> kernel_shape_; // {out_channels, in_channels, kernel_height, kernel_width}
+    std::array<std::size_t, 3> input_shape_; // {in_channels, input_height, input_width}
+    std::array<std::size_t, 3> output_shape_; // {out_channels, output_height, output_width}
 
     std::array<std::size_t, 2> dilations_;
     std::array<std::size_t, 4> pads_;
@@ -71,7 +71,7 @@ struct Conv2DOp {
 
     TensorDimensions get_output_tensor_dims() const noexcept;
 
-    bool operator==(const Conv2DOp &) const noexcept;
+    bool operator==(const Conv2DOp&) const noexcept;
 };
 
 
@@ -93,9 +93,9 @@ std::array<std::size_t, 3> Conv2DOp::compute_output_shape() const noexcept {
     std::array<std::size_t, 3> output_shape;
     output_shape[0] = kernel_shape_[0];
     output_shape[1] =
-            compute_output_dimension(input_shape_[1], kernel_shape_[2], pads_[0], pads_[2], strides_[0]);
+        compute_output_dimension(input_shape_[1], kernel_shape_[2], pads_[0], pads_[2], strides_[0]);
     output_shape[2] =
-            compute_output_dimension(input_shape_[2], kernel_shape_[3], pads_[1], pads_[3], strides_[1]);
+        compute_output_dimension(input_shape_[2], kernel_shape_[3], pads_[1], pads_[3], strides_[1]);
     return output_shape;
 }
 
@@ -143,29 +143,35 @@ std::pair<std::size_t, std::size_t> Conv2DOp::compute_output_matrix_shape() cons
 
 TensorDimensions Conv2DOp::get_input_tensor_dims() const noexcept {
     assert(verify());
-    return {.batch_size_ = 1,
-            .num_channels_ = input_shape_[0],
-            .height_ = input_shape_[1],
-            .width_ = input_shape_[2]};
+    return {
+        .batch_size_ = 1,
+        .num_channels_ = input_shape_[0],
+        .height_ = input_shape_[1],
+        .width_ = input_shape_[2]
+    };
 }
 
 TensorDimensions Conv2DOp::get_kernel_tensor_dims() const noexcept {
     assert(verify());
-    return {.batch_size_ = kernel_shape_[0],
-            .num_channels_ = kernel_shape_[1],
-            .height_ = kernel_shape_[2],
-            .width_ = kernel_shape_[3]};
+    return {
+        .batch_size_ = kernel_shape_[0],
+        .num_channels_ = kernel_shape_[1],
+        .height_ = kernel_shape_[2],
+        .width_ = kernel_shape_[3]
+    };
 }
 
 TensorDimensions Conv2DOp::get_output_tensor_dims() const noexcept {
     assert(verify());
-    return {.batch_size_ = 1,
-            .num_channels_ = output_shape_[0],
-            .height_ = output_shape_[1],
-            .width_ = output_shape_[2]};
+    return {
+        .batch_size_ = 1,
+        .num_channels_ = output_shape_[0],
+        .height_ = output_shape_[1],
+        .width_ = output_shape_[2]
+    };
 }
 
-bool Conv2DOp::operator==(const Conv2DOp &other) const noexcept {
+bool Conv2DOp::operator==(const Conv2DOp& other) const noexcept {
     assert(verify());
     assert(other.verify());
     bool result = true;
@@ -177,7 +183,6 @@ bool Conv2DOp::operator==(const Conv2DOp &other) const noexcept {
     result = result && strides_ == other.strides_;
     return result;
 }
-
 
 
 struct MaxPoolOp {
@@ -215,9 +220,9 @@ std::array<std::size_t, 3> MaxPoolOp::compute_output_shape() const noexcept {
     std::array<std::size_t, 3> output_shape;
     output_shape[0] = input_shape_[0];
     output_shape[1] =
-            compute_output_dimension(input_shape_[1], kernel_shape_[2], strides_[0]);
+        compute_output_dimension(input_shape_[1], kernel_shape_[2], strides_[0]);
     output_shape[2] =
-            compute_output_dimension(input_shape_[2], kernel_shape_[3], strides_[1]);
+        compute_output_dimension(input_shape_[2], kernel_shape_[3], strides_[1]);
     return output_shape;
 }
 
@@ -238,32 +243,35 @@ std::size_t MaxPoolOp::compute_output_size() const noexcept {
 
 TensorDimensions MaxPoolOp::get_input_tensor_dims() const noexcept {
     assert(verify());
-    return {.batch_size_ = 1,
-            .num_channels_ = input_shape_[0],
-            .height_ = input_shape_[1],
-            .width_ = input_shape_[2]};
+    return {
+        .batch_size_ = 1,
+        .num_channels_ = input_shape_[0],
+        .height_ = input_shape_[1],
+        .width_ = input_shape_[2]
+    };
 }
 
 TensorDimensions MaxPoolOp::get_output_tensor_dims() const noexcept {
     assert(verify());
-    return {.batch_size_ = 1,
-            .num_channels_ = output_shape_[0],
-            .height_ = output_shape_[1],
-            .width_ = output_shape_[2]};
+    return {
+        .batch_size_ = 1,
+        .num_channels_ = output_shape_[0],
+        .height_ = output_shape_[1],
+        .width_ = output_shape_[2]
+    };
 }
 
 
-
-template<typename T>
-void convolution(const T *input_buffer, const T *kernel_buffer, T *output_buffer, const Conv2DOp &conv_op) {
+template <typename T>
+void convolution(const T* input_buffer, const T* kernel_buffer, T* output_buffer, const Conv2DOp& conv_op) {
     using TensorType3 = Eigen::Tensor<T, 3, Eigen::RowMajor>;
     using CTensorType3 = Eigen::Tensor<const T, 3, Eigen::RowMajor>;
     using CTensorType4 = Eigen::Tensor<const T, 4, Eigen::RowMajor>;
 
     assert(conv_op.verify());
-    const auto &output_shape = conv_op.output_shape_;
-    const auto &input_shape = conv_op.input_shape_;
-    const auto &kernel_shape = conv_op.kernel_shape_;
+    const auto& output_shape = conv_op.output_shape_;
+    const auto& input_shape = conv_op.input_shape_;
+    const auto& kernel_shape = conv_op.kernel_shape_;
 
     Eigen::TensorMap<CTensorType3> input(input_buffer, input_shape[0], input_shape[1],
                                          input_shape[2]);
@@ -272,39 +280,43 @@ void convolution(const T *input_buffer, const T *kernel_buffer, T *output_buffer
     Eigen::TensorMap<TensorType3> output(output_buffer, output_shape[0], output_shape[1],
                                          output_shape[2]);
     const std::array<Eigen::Index, 2> kernel_matrix_dimensions = {
-            static_cast<Eigen::Index>(kernel_shape[1] * kernel_shape[2] * kernel_shape[3]),
-            static_cast<Eigen::Index>(kernel_shape[0])};
+        static_cast<Eigen::Index>(kernel_shape[1] * kernel_shape[2] * kernel_shape[3]),
+        static_cast<Eigen::Index>(kernel_shape[0])
+    };
     const std::array<Eigen::Index, 2> input_matrix_dimensions = {
-            static_cast<Eigen::Index>(output_shape[1] * output_shape[2]),
-            static_cast<Eigen::Index>(kernel_shape[1] * kernel_shape[2] * kernel_shape[3])};
+        static_cast<Eigen::Index>(output_shape[1] * output_shape[2]),
+        static_cast<Eigen::Index>(kernel_shape[1] * kernel_shape[2] * kernel_shape[3])
+    };
 
     auto kernel_matrix =
-            kernel.shuffle(std::array<int, 4>{3, 2, 1, 0}).reshape(kernel_matrix_dimensions);
+        kernel.shuffle(std::array<int, 4>{3, 2, 1, 0}).reshape(kernel_matrix_dimensions);
 
     auto input_matrix =
-            input.shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0})
-                    .extract_image_patches(kernel_shape[2], kernel_shape[3], conv_op.strides_[0],
-                                           conv_op.strides_[1], conv_op.dilations_[0], conv_op.dilations_[1],
-                                           1, 1, conv_op.pads_[0], conv_op.pads_[2], conv_op.pads_[1],
-                                           conv_op.pads_[3], 0)
-                    .reshape(input_matrix_dimensions);
+        input.shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0})
+             .extract_image_patches(kernel_shape[2], kernel_shape[3], conv_op.strides_[0],
+                                    conv_op.strides_[1], conv_op.dilations_[0], conv_op.dilations_[1],
+                                    1, 1, conv_op.pads_[0], conv_op.pads_[2], conv_op.pads_[1],
+                                    conv_op.pads_[3], 0)
+             .reshape(input_matrix_dimensions);
 
     const std::array<Eigen::IndexPair<Eigen::Index>, 1> contraction_dimensions = {
-            Eigen::IndexPair<Eigen::Index>(1, 0)};
+        Eigen::IndexPair<Eigen::Index>(1, 0)
+    };
     auto output_matrix =
-            kernel_matrix.shuffle(std::array<Eigen::Index, 2>{1, 0})
-                    .contract(input_matrix.shuffle(std::array<Eigen::Index, 2>{1, 0}), contraction_dimensions)
-                    .shuffle(std::array<Eigen::Index, 2>{1, 0});
+        kernel_matrix.shuffle(std::array<Eigen::Index, 2>{1, 0})
+                     .contract(input_matrix.shuffle(std::array<Eigen::Index, 2>{1, 0}), contraction_dimensions)
+                     .shuffle(std::array<Eigen::Index, 2>{1, 0});
 
     const std::array<Eigen::Index, 3> rev_output_dimensions = {
-            output.dimension(2), output.dimension(1), output.dimension(0)};
+        output.dimension(2), output.dimension(1), output.dimension(0)
+    };
     output =
-            output_matrix.reshape(rev_output_dimensions).shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0});
+        output_matrix.reshape(rev_output_dimensions).shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0});
 }
 
-template<typename T>
-std::vector<T> convolution(const std::vector<T> &input_buffer,
-                           const std::vector<T> &kernel_buffer, const Conv2DOp &conv_op) {
+template <typename T>
+std::vector<T> convolution(const std::vector<T>& input_buffer,
+                           const std::vector<T>& kernel_buffer, const Conv2DOp& conv_op) {
     assert(conv_op.verify());
     assert(input_buffer.size() == conv_op.compute_input_size());
     assert(kernel_buffer.size() == conv_op.compute_kernel_size());
@@ -334,17 +346,17 @@ void sumPool(const T* input, T* output, const MaxPoolOp& op) {
     Eigen::TensorMap<TensorType3> tensor_dst(output, out_channels, out_rows, out_columns);
 
     tensor_dst = tensor_src.shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0})
-            .extract_image_patches(kernel_rows, kernel_columns, stride_rows, stride_columns,
-                                   1, 1, 1, 1, 0, 0, 0, 0, T(0))
-            .sum(Eigen::array<Eigen::Index, 2>{1, 2})
-            .reshape(Eigen::array<Eigen::Index, 3>{out_columns, out_rows, out_channels})
-            .shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0});
+                           .extract_image_patches(kernel_rows, kernel_columns, stride_rows, stride_columns,
+                                                  1, 1, 1, 1, 0, 0, 0, 0, T(0))
+                           .sum(Eigen::array<Eigen::Index, 2>{1, 2})
+                           .reshape(Eigen::array<Eigen::Index, 3>{out_columns, out_rows, out_channels})
+                           .shuffle(Eigen::array<Eigen::Index, 3>{2, 1, 0});
 }
 
 
-template<typename T>
+template <typename T>
 inline
-std::vector<T> sumPool(const std::vector<T> &inputBuf, const MaxPoolOp& op) {
+std::vector<T> sumPool(const std::vector<T>& inputBuf, const MaxPoolOp& op) {
     std::vector<T> outputBuf(op.compute_output_size());
     sumPool(inputBuf.data(), outputBuf.data(), op);
     return outputBuf;

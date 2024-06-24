@@ -23,16 +23,16 @@ template <typename Tp>
 void truncateClearVecInplace(std::vector<Tp>& x);
 
 template <typename ClearType>
-ClearType double2fix(double x);
+[[nodiscard]] ClearType double2fix(double x);
 
 template <typename ClearType>
-std::vector<ClearType> double2fixVec(const std::vector<double>& x);
+[[nodiscard]] std::vector<ClearType> double2fixVec(const std::vector<double>& x);
 
 template <typename ClearType>
-double fix2double(ClearType x);
+[[nodiscard]] double fix2double(ClearType x);
 
 template <typename ClearType>
-std::vector<double> fix2doubleVec(const std::vector<ClearType>& x);
+[[nodiscard]] std::vector<double> fix2doubleVec(const std::vector<ClearType>& x);
 
 
 namespace FixedPoint {
