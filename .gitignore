@@ -1,6 +1,8 @@
 # Project-specific files
 fake-offline-data/
 
+build/
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/clion,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=clion,macos

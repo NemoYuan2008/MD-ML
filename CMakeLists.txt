@@ -4,7 +4,7 @@ project(MD-ML)
 set(CMAKE_CXX_STANDARD 20)
 
 find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED system)
+find_package(Boost REQUIRED)    # We only need the header-only Boost::Asio library
 
 include_directories(src ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 

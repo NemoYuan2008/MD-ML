@@ -101,10 +101,10 @@ void MultiplyGate<ShrType>::doRunOnline() {
     // [Delta_z_mac] += [c_mac] + [lambda_z_mac]
     matrixAddAssign(Delta_z_mac,
                     matrixAdd(c_shr_mac_, this->lambda_shr_mac()));
-    // [Delta_z_mac] -= [a_mac] * temp_y_mac
+    // [Delta_z_mac] -= [a_mac] * temp_y
     matrixSubtractAssign(Delta_z_mac,
                          matrixMultiply(a_shr_mac_, temp_y, this->dim_row(), this->dim_mid(), this->dim_col()));
-    // [Delta_z_mac] -= temp_x_mac * [b_mac]
+    // [Delta_z_mac] -= temp_x * [b_mac]
     matrixSubtractAssign(Delta_z_mac,
                          matrixMultiply(temp_x, b_shr_mac_, this->dim_row(), this->dim_mid(), this->dim_col()));
 

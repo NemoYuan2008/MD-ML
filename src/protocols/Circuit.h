@@ -17,10 +17,11 @@
 #include "protocols/MultiplyGate.h"
 #include "protocols/OutputGate.h"
 #include "protocols/MultiplyTruncGate.h"
+#include "protocols/Conv2DGate.h"
 
 namespace md_ml {
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 class Circuit {
 public:
     explicit Circuit(PartyWithFakeOffline<ShrType>& party) : party_(party) {}
@@ -50,6 +51,10 @@ public:
     std::shared_ptr<MultiplyTruncGate<ShrType>>
     multiplyTrunc(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
 
+    std::shared_ptr<Conv2DGate<ShrType>>
+    conv2D(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y,
+           const Conv2DOp& op);
+
 private:
     PartyWithFakeOffline<ShrType>& party_;
     std::vector<std::shared_ptr<Gate<ShrType>>> gates_;
@@ -58,47 +63,47 @@ private:
 };
 
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 void Circuit<ShrType>::addEndPoint(const std::shared_ptr<Gate<ShrType>>& gate) {
     endpoints_.push_back(gate);
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 void Circuit<ShrType>::runOffline() {
     for (const auto& gate : endpoints_) {
         gate->runOffline();
     }
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 void Circuit<ShrType>::readOfflineFromFile() {
     for (const auto& gate : endpoints_) {
         gate->readOfflineFromFile();
     }
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 void Circuit<ShrType>::runOnline() {
     for (const auto& gate : endpoints_) {
         gate->RunOnline();
     }
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 void Circuit<ShrType>::runOnlineWithBenckmark() {
     timer_.start();
     runOnline();
     timer_.stop();
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 void Circuit<ShrType>::printStats() {
     std::cout
         << "Spent " << timer_.elapsed() << " ms\n"
         << "Sent " << party_.bytes_sent() << " bytes\n";
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<InputGate<ShrType>> Circuit<ShrType>::
 input(std::size_t owner_id, std::size_t dim_row, std::size_t dim_col) {
     auto gate = std::make_shared<InputGate<ShrType>>(party_, dim_row, dim_col, owner_id);
@@ -106,7 +111,7 @@ input(std::size_t owner_id, std::size_t dim_row, std::size_t dim_col) {
     return gate;
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<AddGate<ShrType>> Circuit<ShrType>::
 add(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y) {
     auto gate = std::make_shared<AddGate<ShrType>>(input_x, input_y);
@@ -114,7 +119,7 @@ add(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<Sh
     return gate;
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<SubtractGate<ShrType>> Circuit<ShrType>::
 subtract(const std::shared_ptr<Gate<ShrType>>& input_x,
          const std::shared_ptr<Gate<ShrType>>& input_y) {
@@ -123,7 +128,7 @@ subtract(const std::shared_ptr<Gate<ShrType>>& input_x,
     return gate;
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<MultiplyGate<ShrType>> Circuit<ShrType>::
 multiply(const std::shared_ptr<Gate<ShrType>>& input_x,
          const std::shared_ptr<Gate<ShrType>>& input_y) {
@@ -132,7 +137,7 @@ multiply(const std::shared_ptr<Gate<ShrType>>& input_x,
     return gate;
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<OutputGate<ShrType>> Circuit<ShrType>::
 output(const std::shared_ptr<Gate<ShrType>>& input) {
     auto gate = std::make_shared<OutputGate<ShrType>>(input);
@@ -140,11 +145,21 @@ output(const std::shared_ptr<Gate<ShrType>>& input) {
     return gate;
 }
 
-template <typename ShrType>
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<MultiplyTruncGate<ShrType>> Circuit<ShrType>::
 multiplyTrunc(const std::shared_ptr<Gate<ShrType>>& input_x,
               const std::shared_ptr<Gate<ShrType>>& input_y) {
     auto gate = std::make_shared<MultiplyTruncGate<ShrType>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType>
+std::shared_ptr<Conv2DGate<ShrType>> Circuit<ShrType>::
+conv2D(const std::shared_ptr<Gate<ShrType>>& input_x,
+       const std::shared_ptr<Gate<ShrType>>& input_y,
+       const Conv2DOp& op) {
+    auto gate = std::make_shared<Conv2DGate<ShrType>>(input_x, input_y, op);
     gates_.push_back(gate);
     return gate;
 }
