@@ -3,16 +3,36 @@ project(MD-ML)
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED)    # We only need the header-only Boost::Asio library
+set(INCLUDE_DIR) # List of include directories
+set(ONLINE_LIB) # List of libraries to link against for online execution
+set(FAKE_OFFLINE_LIB) # List of libraries to link against for fake offline execution
 
-include_directories(src ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+set(INCLUDE_DIR ${INCLUDE_DIR} src)
+
+# Import Eigen, see https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html
+find_package(Eigen3 REQUIRED NO_MODULE)
+set(ONLINE_LIB ${ONLINE_LIB} Eigen3::Eigen)
+set(FAKE_OFFLINE_LIB ${FAKE_OFFLINE_LIB} Eigen3::Eigen)
+
+# Import Boost, we only need the header-only Boost::Asio library,
+# so we do not specify components, nor do we add it to the list of libraries
+find_package(Boost REQUIRED)
+set(INCLUDE_DIR ${INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+
+include_directories(${INCLUDE_DIR})
+
+# For Windows, we need to link against ws2_32 and wsock32 for sockets
+if (WIN32)
+    set(ONLINE_LIB ${ONLINE_LIB} ws2_32 wsock32)
+endif ()
+
 
 # Create a directory for fake offline data, and pass it to the compiler
 set(FAKE_OFFLINE_DIR "${PROJECT_SOURCE_DIR}/fake-offline-data")
 file(MAKE_DIRECTORY ${FAKE_OFFLINE_DIR})
 add_compile_definitions(FAKE_OFFLINE_DIR="${FAKE_OFFLINE_DIR}")
 
+# Macros for debugging
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(MD_ML_DEBUG)
     add_compile_definitions(MD_ML_DEBUG_ASIO)
@@ -20,6 +40,7 @@ endif ()
 
 
 add_subdirectory(src/networking)
+set(ONLINE_LIB ${ONLINE_LIB} md-ml-networking)
 
 set(SRC_SHARE
         src/share/Spdz2kShare.h
@@ -74,17 +95,9 @@ set(SRC_TIMER
         src/utils/Timer.h
         src/utils/Timer.cpp)
 add_library(md-ml-timer ${SRC_TIMER})
+set(ONLINE_LIB ${ONLINE_LIB} md-ml-timer)
 
 
-set(ONLINE_LIB
-        Eigen3::Eigen
-        md-ml-networking
-        md-ml-timer
-)
-
-set(FAKE_OFFLINE_LIB
-        Eigen3::Eigen
-)
 
 add_subdirectory(experiments)
 

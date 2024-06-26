@@ -28,20 +28,19 @@ int main() {
     // circuit.runOffline();
 
     // Tests for Conv2D correctness
-    const int rows = 32;
-    const int cols = 32;
+    const int rows = 5;
+    const int cols = 5;
     const int in_channels = 3;
     const int out_channels = 1;
-    const int kernel_size = 3;
+    const int kernel_shape = 3;
     const int pad = 1;
     const int stride = 1;
 
-    const int layers = 4;
     const Conv2DOp conv_op = {
-        .kernel_shape_ = {out_channels, in_channels, kernel_size, kernel_size},
+        .kernel_shape_ = {out_channels, in_channels, kernel_shape, kernel_shape},
         .input_shape_ = {in_channels, rows, cols},
         .output_shape_ = {
-            out_channels, (rows + 2 * pad + 1 - kernel_size) / stride, (cols + 2 * pad + 1 - kernel_size) / stride
+            out_channels, (rows + 2 * pad + 1 - kernel_shape) / stride, (cols + 2 * pad + 1 - kernel_shape) / stride
         },
         .dilations_ = {1, 1},
         .pads_ = {pad, pad, pad, pad},
@@ -50,9 +49,12 @@ int main() {
 
     auto kernel = circuit.input(
         0,
-        conv_op.kernel_shape_[0] * conv_op.kernel_shape_[1] * conv_op.kernel_shape_[2] * conv_op.kernel_shape_[3],
+        conv_op.compute_kernel_size(),
         1);
-    auto input_image = circuit.input(0, conv_op.output_shape_[1] * conv_op.output_shape_[2], 1);
+    auto input_image = circuit.input(
+        0,
+        conv_op.compute_input_size(),
+        1);
     auto a = circuit.conv2D(input_image, kernel, conv_op);
     auto o = circuit.output(a);
 
