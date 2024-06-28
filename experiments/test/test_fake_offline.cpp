@@ -17,7 +17,7 @@ int main() {
     FakeParty<ShrType, 2> party("test");
     FakeCircuit<ShrType, 2> circuit(party);
 
-    // // Tests for truncation correctness
+    // // Test for truncation correctness
     // auto a = circuit.input(0, 1, 1);
     // auto b = circuit.input(0, 1, 1);
     // auto c = circuit.multiplyTrunc(a, b);
@@ -27,35 +27,43 @@ int main() {
     // circuit.addEndpoint(d);
     // circuit.runOffline();
 
-    // Tests for Conv2D correctness
-    const int rows = 5;
-    const int cols = 5;
-    const int in_channels = 3;
-    const int out_channels = 1;
-    const int kernel_shape = 3;
-    const int pad = 1;
-    const int stride = 1;
+    // // Test for Conv2D correctness
+    // const size_t rows = 5;
+    // const size_t cols = 5;
+    // const size_t in_channels = 3;
+    // const size_t out_channels = 1;
+    // const size_t kernel_shape = 3;
+    // const size_t pad = 1;
+    // const size_t stride = 1;
+    //
+    // const Conv2DOp conv_op = {
+    //     .kernel_shape_ = {out_channels, in_channels, kernel_shape, kernel_shape},
+    //     .input_shape_ = {in_channels, rows, cols},
+    //     .output_shape_ = {
+    //         out_channels, (rows + 2 * pad + 1 - kernel_shape) / stride, (cols + 2 * pad + 1 - kernel_shape) / stride
+    //     },
+    //     .dilations_ = {1, 1},
+    //     .pads_ = {pad, pad, pad, pad},
+    //     .strides_ = {stride, stride}
+    // };
+    //
+    // auto kernel = circuit.input(
+    //     0,
+    //     conv_op.compute_kernel_size(),
+    //     1);
+    // auto input_image = circuit.input(
+    //     0,
+    //     conv_op.compute_input_size(),
+    //     1);
+    // auto a = circuit.conv2D(input_image, kernel, conv_op);
+    // auto o = circuit.output(a);
+    //
+    // circuit.addEndpoint(o);
+    // circuit.runOffline();
 
-    const Conv2DOp conv_op = {
-        .kernel_shape_ = {out_channels, in_channels, kernel_shape, kernel_shape},
-        .input_shape_ = {in_channels, rows, cols},
-        .output_shape_ = {
-            out_channels, (rows + 2 * pad + 1 - kernel_shape) / stride, (cols + 2 * pad + 1 - kernel_shape) / stride
-        },
-        .dilations_ = {1, 1},
-        .pads_ = {pad, pad, pad, pad},
-        .strides_ = {stride, stride}
-    };
-
-    auto kernel = circuit.input(
-        0,
-        conv_op.compute_kernel_size(),
-        1);
-    auto input_image = circuit.input(
-        0,
-        conv_op.compute_input_size(),
-        1);
-    auto a = circuit.conv2D(input_image, kernel, conv_op);
+    // Test for Gtz correctness
+    auto input_x = circuit.input(0, 1, 1);
+    auto a = circuit.gtz(input_x);
     auto o = circuit.output(a);
 
     circuit.addEndpoint(o);

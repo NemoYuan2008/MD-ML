@@ -18,6 +18,7 @@
 #include "fake-offline/FakeOutputGate.h"
 #include "fake-offline/FakeMultiplyTruncGate.h"
 #include "fake-offline/FakeConv2DGate.h"
+#include "fake-offline/FakeGtzGate.h"
 
 
 namespace md_ml {
@@ -61,6 +62,9 @@ public:
     conv2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
            const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
            const Conv2DOp& op);
+
+    std::shared_ptr<FakeGtzGate<ShrType, N>>
+    gtz(const std::shared_ptr<FakeGate<ShrType, N>>& input_x);
 
 private:
     FakeParty<ShrType, N>& fake_party_;
@@ -142,6 +146,14 @@ conv2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
        const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
        const Conv2DOp& op) {
     auto gate = std::make_shared<FakeConv2DGate<ShrType, N>>(input_x, input_y, op);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeGtzGate<ShrType, N>> FakeCircuit<ShrType, N>::
+gtz(const std::shared_ptr<FakeGate<ShrType, N>>& input_x) {
+    auto gate = std::make_shared<FakeGtzGate<ShrType, N>>(input_x);
     gates_.push_back(gate);
     return gate;
 }

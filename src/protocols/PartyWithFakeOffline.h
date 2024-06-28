@@ -27,7 +27,9 @@ public:
 
     std::vector<SemiShrType> ReadShares(std::size_t num_elements);
 
-    // std::vector<ClearType> ReadClear(std::size_t num_elements);
+    std::vector<ClearType> ReadClear(std::size_t num_elements);
+
+    [[nodiscard]] std::ifstream& input_file() { return input_file_; }
 
     [[nodiscard]] GlobalKeyType global_key_shr() const { return global_key_shr_; }
 
@@ -61,16 +63,15 @@ ReadShares(std::size_t num_elements) {
     return shares;
 }
 
-
-// template <IsSpdz2kShare ShrType>
-// std::vector<typename PartyWithFakeOffline<ShrType>::ClearType> PartyWithFakeOffline<ShrType>::
-// ReadClear(std::size_t num_elements) {
-//     auto clear = std::vector<ClearType>(num_elements);
-//     for (auto& c : clear) {
-//         input_file_ >> c;
-//     }
-//     return clear;
-// }
+template <IsSpdz2kShare ShrType>
+std::vector<typename PartyWithFakeOffline<ShrType>::ClearType> PartyWithFakeOffline<ShrType>::
+ReadClear(std::size_t num_elements) {
+    auto clear = std::vector<ClearType>(num_elements);
+    for (auto& c : clear) {
+        input_file_ >> c;
+    }
+    return clear;
+}
 
 } // namespace md_ml
 

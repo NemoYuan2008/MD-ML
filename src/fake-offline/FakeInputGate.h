@@ -3,6 +3,7 @@
 #ifndef MD_ML_FAKEINPUTGATE_H
 #define MD_ML_FAKEINPUTGATE_H
 
+#include <memory>
 #include <algorithm>
 
 #include "utils/rand.h"

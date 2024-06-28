@@ -59,6 +59,7 @@ set(SRC_FAKE_OFFLINE
         src/fake-offline/FakeOutputGate.h
         src/fake-offline/FakeMultiplyTruncGate.h
         src/fake-offline/FakeConv2DGate.h
+        src/fake-offline/FakeGtzGate.h
 )
 
 set(SRC_UTILS
@@ -81,6 +82,7 @@ set(SRC_PROTOCOLS
         src/protocols/SubtractGate.h
         src/protocols/MultiplyTruncGate.h
         src/protocols/Conv2DGate.h
+        src/protocols/GtzGate.h
 )
 
 set(SRC_FILES

@@ -18,6 +18,7 @@
 #include "protocols/OutputGate.h"
 #include "protocols/MultiplyTruncGate.h"
 #include "protocols/Conv2DGate.h"
+#include "protocols/GtzGate.h"
 
 namespace md_ml {
 
@@ -54,6 +55,9 @@ public:
     std::shared_ptr<Conv2DGate<ShrType>>
     conv2D(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y,
            const Conv2DOp& op);
+
+    std::shared_ptr<GtzGate<ShrType>>
+    gtz(const std::shared_ptr<Gate<ShrType>>& input_x);
 
 private:
     PartyWithFakeOffline<ShrType>& party_;
@@ -160,6 +164,14 @@ conv2D(const std::shared_ptr<Gate<ShrType>>& input_x,
        const std::shared_ptr<Gate<ShrType>>& input_y,
        const Conv2DOp& op) {
     auto gate = std::make_shared<Conv2DGate<ShrType>>(input_x, input_y, op);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType>
+std::shared_ptr<GtzGate<ShrType>> Circuit<ShrType>::
+gtz(const std::shared_ptr<Gate<ShrType>>& input_x) {
+    auto gate = std::make_shared<GtzGate<ShrType>>(input_x);
     gates_.push_back(gate);
     return gate;
 }
