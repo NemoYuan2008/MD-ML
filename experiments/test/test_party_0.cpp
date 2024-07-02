@@ -16,23 +16,24 @@ int main() {
     PartyWithFakeOffline<ShrType> party(0, 2, 5050, "test");
     Circuit<ShrType> circuit(party);
 
-    // // Tests for truncation correctness
-    // auto a = circuit.input(0, 1, 1);
-    // auto b = circuit.input(0, 1, 1);
-    // auto c = circuit.multiplyTrunc(a, b);
-    // auto d = circuit.output(c);
-    // circuit.addEndpoint(d);
-    //
-    // vector<ClearType> vec{};
-    // vec.push_back(double2fix<ClearType>(1.5));
-    // a->setInput(vec);
-    // b->setInput(vec);
-    //
-    // circuit.readOfflineFromFile();
-    // circuit.runOnlineWithBenckmark();
-    //
-    // auto o = d->getClear();
-    // cout << "output: " << fix2double<ClearType>(o[0]) << endl;
+    // Tests for truncation correctness
+    auto a = circuit.input(0, 1, 1);
+    auto b = circuit.input(0, 1, 1);
+    auto c = circuit.multiplyTrunc(a, b);
+    auto d = circuit.output(c);
+    circuit.addEndpoint(d);
+
+    vector<ClearType> vec{};
+    vec.push_back(double2fix<ClearType>(1.5));
+    a->setInput(vec);
+    b->setInput(vec);
+
+    circuit.readOfflineFromFile();
+    circuit.runOnlineWithBenckmark();
+    circuit.printStats();
+
+    auto o = d->getClear();
+    cout << "output: " << fix2double<ClearType>(o[0]) << endl;
 
     // // Test for Conv2D correctness
     // const size_t rows = 5;
@@ -124,34 +125,34 @@ int main() {
     // cout << "Output: ";
     // PrintVector(output);
 
-    // Test for AvgPool2D correctness
-    const int rows = 32;
-    const int cols = 32;
-    const int kernel_size = 5;
-    const int stride = 1;
-
-    const MaxPoolOp op = {
-        .input_shape_ = {1, rows, cols},
-        .output_shape_ = {1, (rows + 1 - kernel_size) / stride, (cols + 1 - kernel_size) / stride},
-        .kernel_shape_ = {kernel_size, kernel_size},
-        .strides_ = {1, 1},
-    };
-
-    auto x = circuit.input(0, rows, cols);
-    auto a = circuit.avgPool2D(x, op);
-    auto o = circuit.output(a);
-
-    std::vector<Spdz2kShare64::ClearType> xIn(rows * cols);
-    x->setInput(xIn);
-
-    circuit.addEndpoint(o);
-    circuit.readOfflineFromFile();
-    circuit.runOnlineWithBenckmark();
-    circuit.printStats();
-
-    auto output = o->getClear();
-    cout << "Output: ";
-    PrintVector(output);
+    // // Test for AvgPool2D correctness
+    // const int rows = 32;
+    // const int cols = 32;
+    // const int kernel_size = 5;
+    // const int stride = 1;
+    //
+    // const MaxPoolOp op = {
+    //     .input_shape_ = {1, rows, cols},
+    //     .output_shape_ = {1, (rows + 1 - kernel_size) / stride, (cols + 1 - kernel_size) / stride},
+    //     .kernel_shape_ = {kernel_size, kernel_size},
+    //     .strides_ = {1, 1},
+    // };
+    //
+    // auto x = circuit.input(0, rows, cols);
+    // auto a = circuit.avgPool2D(x, op);
+    // auto o = circuit.output(a);
+    //
+    // std::vector<Spdz2kShare64::ClearType> xIn(rows * cols);
+    // x->setInput(xIn);
+    //
+    // circuit.addEndpoint(o);
+    // circuit.readOfflineFromFile();
+    // circuit.runOnlineWithBenckmark();
+    // circuit.printStats();
+    //
+    // auto output = o->getClear();
+    // cout << "Output: ";
+    // PrintVector(output);
 
     return 0;
 }

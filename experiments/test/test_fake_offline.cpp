@@ -17,15 +17,15 @@ int main() {
     FakeParty<ShrType, 2> party("test");
     FakeCircuit<ShrType, 2> circuit(party);
 
-    // // Test for truncation correctness
-    // auto a = circuit.input(0, 1, 1);
-    // auto b = circuit.input(0, 1, 1);
-    // auto c = circuit.multiplyTrunc(a, b);
-    //
-    // auto d = circuit.output(c);
-    //
-    // circuit.addEndpoint(d);
-    // circuit.runOffline();
+    // Test for truncation correctness
+    auto a = circuit.input(0, 1, 1);
+    auto b = circuit.input(0, 1, 1);
+    auto c = circuit.multiplyTrunc(a, b);
+
+    auto d = circuit.output(c);
+
+    circuit.addEndpoint(d);
+    circuit.runOffline();
 
     // // Test for Conv2D correctness
     // const size_t rows = 5;
@@ -77,25 +77,25 @@ int main() {
     // circuit.addEndpoint(o);
     // circuit.runOffline();
 
-    // Test for AvgPool2D correctness
-    const int rows = 32;
-    const int cols = 32;
-    const int kernel_size = 5;
-    const int stride = 1;
-
-    const MaxPoolOp op = {
-        .input_shape_ = {1, rows, cols},
-        .output_shape_ = {1, (rows + 1 - kernel_size) / stride, (cols + 1 - kernel_size) / stride},
-        .kernel_shape_ = {kernel_size, kernel_size},
-        .strides_ = {1, 1},
-    };
-
-    auto x = circuit.input(0, rows, cols);
-    auto a = circuit.avgPool2D(x, op);
-    auto o = circuit.output(a);
-
-    circuit.addEndpoint(o);
-    circuit.runOffline();
+    // // Test for AvgPool2D correctness
+    // const int rows = 32;
+    // const int cols = 32;
+    // const int kernel_size = 5;
+    // const int stride = 1;
+    //
+    // const MaxPoolOp op = {
+    //     .input_shape_ = {1, rows, cols},
+    //     .output_shape_ = {1, (rows + 1 - kernel_size) / stride, (cols + 1 - kernel_size) / stride},
+    //     .kernel_shape_ = {kernel_size, kernel_size},
+    //     .strides_ = {1, 1},
+    // };
+    //
+    // auto x = circuit.input(0, rows, cols);
+    // auto a = circuit.avgPool2D(x, op);
+    // auto o = circuit.output(a);
+    //
+    // circuit.addEndpoint(o);
+    // circuit.runOffline();
 
     return 0;
 }
