@@ -18,9 +18,11 @@
 #include "fake-offline/FakeMultiplyGate.h"
 #include "fake-offline/FakeOutputGate.h"
 #include "fake-offline/FakeMultiplyTruncGate.h"
+#include "fake-offline/FakeElemMultiplyGate.h"
 #include "fake-offline/FakeConv2DGate.h"
 #include "fake-offline/FakeConv2DTruncGate.h"
 #include "fake-offline/FakeGtzGate.h"
+#include "fake-offline/FakeReLUGate.h"
 
 
 namespace md_ml {
@@ -67,6 +69,10 @@ public:
     multiplyTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
                   const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
 
+    std::shared_ptr<FakeElemMultiplyGate<ShrType, N>>
+    elementMultiply(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+                    const std::shared_ptr<FakeGate<ShrType, N>>& input_y);
+
     std::shared_ptr<FakeConv2DGate<ShrType, N>>
     conv2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
            const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
@@ -79,6 +85,11 @@ public:
 
     std::shared_ptr<FakeGtzGate<ShrType, N>>
     gtz(const std::shared_ptr<FakeGate<ShrType, N>>& input_x);
+
+    std::shared_ptr<FakeReLUGate<ShrType, N>>
+    relu(const std::shared_ptr<FakeGate<ShrType, N>>& input_x);
+
+    [[nodiscard]] auto& endpoints() { return endpoints_; }
 
 private:
     FakeParty<ShrType, N>& fake_party_;
@@ -164,6 +175,15 @@ multiplyTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
 }
 
 template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeElemMultiplyGate<ShrType, N>> FakeCircuit<ShrType, N>::
+elementMultiply(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+                const std::shared_ptr<FakeGate<ShrType, N>>& input_y) {
+    auto gate = std::make_shared<FakeElemMultiplyGate<ShrType, N>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
 std::shared_ptr<FakeConv2DGate<ShrType, N>> FakeCircuit<ShrType, N>::
 conv2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
        const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
@@ -187,6 +207,14 @@ template <IsSpdz2kShare ShrType, std::size_t N>
 std::shared_ptr<FakeGtzGate<ShrType, N>> FakeCircuit<ShrType, N>::
 gtz(const std::shared_ptr<FakeGate<ShrType, N>>& input_x) {
     auto gate = std::make_shared<FakeGtzGate<ShrType, N>>(input_x);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeReLUGate<ShrType, N>> FakeCircuit<ShrType, N>::
+relu(const std::shared_ptr<FakeGate<ShrType, N>>& input_x) {
+    auto gate = std::make_shared<FakeReLUGate<ShrType, N>>(input_x);
     gates_.push_back(gate);
     return gate;
 }

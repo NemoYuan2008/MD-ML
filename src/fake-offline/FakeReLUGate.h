@@ -9,9 +9,14 @@
 #include "utils/linear_algebra.h"
 #include "share/IsSpdz2kShare.h"
 #include "fake-offline/FakeGate.h"
-#include "fake-offline/FakeCircuit.h"
+
 
 namespace md_ml {
+
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+class FakeCircuit;
+
 
 template <IsSpdz2kShare ShrType, std::size_t N>
 class FakeReLUGate : public FakeGate<ShrType, N> {
@@ -19,6 +24,8 @@ public:
     explicit FakeReLUGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x);
 
 private:
+    void doRunOffline() override;
+
     FakeCircuit<ShrType, N> circuit_;
 };
 
@@ -30,9 +37,18 @@ FakeReLUGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x)
     this->set_dim_col(p_input_x->dim_col());
 
     auto b = this->circuit_.gtz(this->input_x());
-    // TODO: Implement elementMultiply first
+    auto z = this->circuit_.element_multiply(this->input_x(), b);
+    circuit_.addEndpoint(z);
 }
 
-} // md_ml
+template <IsSpdz2kShare ShrType, std::size_t N>
+void FakeReLUGate<ShrType, N>::doRunOffline() {
+    this->circuit_.runOffline();
+    this->lambda_clear() = this->circuit_.endpoints()[0]->lambda_clear();
+    this->lambda_shr() = this->circuit_.endpoints()[0]->lambda_shr();
+    this->lambda_shr_mac() = this->circuit_.endpoints()[0]->lambda_shr_mac();
+}
+
+} // namespace md_ml
 
 #endif //FAKERELUGATE_H

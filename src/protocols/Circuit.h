@@ -17,9 +17,11 @@
 #include "protocols/MultiplyGate.h"
 #include "protocols/OutputGate.h"
 #include "protocols/MultiplyTruncGate.h"
+#include "protocols/ElemMultiplyGate.h"
 #include "protocols/Conv2DGate.h"
 #include "protocols/Conv2DTruncGate.h"
 #include "protocols/GtzGate.h"
+#include "protocols/ReLUGate.h"
 
 namespace md_ml {
 
@@ -53,6 +55,9 @@ public:
     std::shared_ptr<MultiplyTruncGate<ShrType>>
     multiplyTrunc(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
 
+    std::shared_ptr<ElemMultiplyGate<ShrType>>
+    elementMultiply(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
+
     std::shared_ptr<Conv2DGate<ShrType>>
     conv2D(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y,
            const Conv2DOp& op);
@@ -63,6 +68,11 @@ public:
 
     std::shared_ptr<GtzGate<ShrType>>
     gtz(const std::shared_ptr<Gate<ShrType>>& input_x);
+
+    std::shared_ptr<ReLUGate<ShrType>>
+    relu(const std::shared_ptr<Gate<ShrType>>& input_x);
+
+    [[nodiscard]] auto& endpoints() { return endpoints_; }
 
 private:
     PartyWithFakeOffline<ShrType>& party_;
@@ -164,6 +174,15 @@ multiplyTrunc(const std::shared_ptr<Gate<ShrType>>& input_x,
 }
 
 template <IsSpdz2kShare ShrType>
+std::shared_ptr<ElemMultiplyGate<ShrType>> Circuit<ShrType>::
+elementMultiply(const std::shared_ptr<Gate<ShrType>>& input_x,
+                const std::shared_ptr<Gate<ShrType>>& input_y) {
+    auto gate = std::make_shared<ElemMultiplyGate<ShrType>>(input_x, input_y);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<Conv2DGate<ShrType>> Circuit<ShrType>::
 conv2D(const std::shared_ptr<Gate<ShrType>>& input_x,
        const std::shared_ptr<Gate<ShrType>>& input_y,
@@ -187,6 +206,14 @@ template <IsSpdz2kShare ShrType>
 std::shared_ptr<GtzGate<ShrType>> Circuit<ShrType>::
 gtz(const std::shared_ptr<Gate<ShrType>>& input_x) {
     auto gate = std::make_shared<GtzGate<ShrType>>(input_x);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType>
+std::shared_ptr<ReLUGate<ShrType>> Circuit<ShrType>::
+relu(const std::shared_ptr<Gate<ShrType>>& input_x) {
+    auto gate = std::make_shared<ReLUGate<ShrType>>(input_x);
     gates_.push_back(gate);
     return gate;
 }

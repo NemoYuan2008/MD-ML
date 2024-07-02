@@ -74,18 +74,22 @@ boost::asio::ip::port_type Party::WhichPort(std::size_t from_id, std::size_t to_
 
 
 void Party::TryAccept(std::size_t from_id) {
-    acceptors_[from_id].async_accept(receive_sockets_[from_id],
-                                     [this, from_id](const boost::system::error_code& ec) {
-                                         AcceptHandler(ec, from_id);
-                                     });
+    acceptors_[from_id].async_accept(
+        receive_sockets_[from_id],
+        [this, from_id](const boost::system::error_code& ec) {
+            AcceptHandler(ec, from_id);
+        }
+    );
 }
 
 
 void Party::TryConnect(std::size_t to_id) {
-    send_sockets_[to_id].async_connect(send_endpoints_[to_id],
-                                       [to_id, this](const boost::system::error_code& ec) {
-                                           this->ConnectHandler(ec, to_id);
-                                       });
+    send_sockets_[to_id].async_connect(
+        send_endpoints_[to_id],
+        [to_id, this](const boost::system::error_code& ec) {
+            this->ConnectHandler(ec, to_id);
+        }
+    );
 }
 
 

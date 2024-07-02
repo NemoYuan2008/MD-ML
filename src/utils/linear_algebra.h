@@ -13,17 +13,30 @@
 
 namespace md_ml {
 
+// For matrix addtion, subtraction, and scalar product, we can use
+// 1. std::transform
+// 2. std::ranges::transform (more modern)
+// 3. Eigen's implementation of matrix operations
+// 4. naive for loop
+//
+// I found that std::transform is the fastest, so I decided to use std::transform
+// Also, we can use std::execution::par_unseq to parallelize the computation
+// However, the parallelization is only available
+// on Linux gcc and Windows MinGW gcc, but not on macOS Apple Clang.
+// so we detect it using macros to avoid compilation errors on macOS.
+//
+// For matrix multiplication, we use Eigen's implementation.
+//
+// To improve efficiency, the dimensions are not checked in these functions,
+// instead, they are checked in the constructor of the gate classes,
+// so the checks are carried out prior to the online phase.
+
 
 template <typename T>
 inline
 std::vector<T> matrixAdd(const std::vector<T>& x, const std::vector<T>& y) {
     std::vector<T> output(x.size());
 
-    // I found that std::transform is faster than Eigen's implementation of matrix addition,
-    // but std::ranges::transform is slower, so I decided to use std::transform
-    // Also, we can use std::execution::par_unseq to parallelize the computation
-    // However, the parallelization is only available in libstdc++ (Linux), not available in libc++ (macOS),
-    // so we detect it using macros to avoid compilation errors on macOS.
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL   // or !__cpp_lib_execution?
     std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::plus<T>());
 #else
@@ -108,6 +121,22 @@ void matrixScalarAssign(std::vector<T>& x, T scalar) {
 #else
     std::transform(std::execution::par_unseq, x.begin(), x.end(), x.begin(), [scalar](T val) { return scalar * val; });
 #endif
+}
+
+
+template <typename T>
+inline
+std::vector<T> matrixElemMultiply(std::vector<T>& x, std::vector<T>& y) {
+    std::vector<T> output(x.size());
+
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(x.begin(), x.end(), y.begin(), output.begin(), std::multiplies<T>());
+#else
+    std::transform(std::execution::par_unseq,
+                   x.begin(), x.end(), y.begin(), output.begin(), std::multiplies<T>());
+#endif
+
+    return output;
 }
 
 
