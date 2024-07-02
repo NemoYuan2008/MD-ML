@@ -14,6 +14,7 @@
 
 #include "share/IsSpdz2kShare.h"
 #include "utils/rand.h"
+#include "utils/uint128_io.h"
 
 namespace md_ml {
 

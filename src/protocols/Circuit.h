@@ -14,6 +14,7 @@
 #include "protocols/InputGate.h"
 #include "protocols/AddGate.h"
 #include "protocols/SubtractGate.h"
+#include "protocols/AddConstantGate.h"
 #include "protocols/MultiplyGate.h"
 #include "protocols/OutputGate.h"
 #include "protocols/MultiplyTruncGate.h"
@@ -22,15 +23,18 @@
 #include "protocols/Conv2DTruncGate.h"
 #include "protocols/GtzGate.h"
 #include "protocols/ReLUGate.h"
+#include "protocols/AvgPool2DGate.h"
 
 namespace md_ml {
 
 template <IsSpdz2kShare ShrType>
 class Circuit {
 public:
+    using ClearType = typename ShrType::ClearType;
+
     explicit Circuit(PartyWithFakeOffline<ShrType>& party) : party_(party) {}
 
-    void addEndPoint(const std::shared_ptr<Gate<ShrType>>& gate);
+    void addEndpoint(const std::shared_ptr<Gate<ShrType>>& gate);
     void runOffline();
     void readOfflineFromFile();
     void runOnline();
@@ -45,6 +49,9 @@ public:
 
     std::shared_ptr<SubtractGate<ShrType>>
     subtract(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
+
+    std::shared_ptr<AddConstantGate<ShrType>>
+    addConstant(const std::shared_ptr<Gate<ShrType>>& input_x, ClearType constant);
 
     std::shared_ptr<MultiplyGate<ShrType>>
     multiply(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y);
@@ -66,6 +73,9 @@ public:
     conv2DTrunc(const std::shared_ptr<Gate<ShrType>>& input_x, const std::shared_ptr<Gate<ShrType>>& input_y,
                 const Conv2DOp& op);
 
+    std::shared_ptr<AvgPool2DGate<ShrType>>
+    avgPool2D(const std::shared_ptr<Gate<ShrType>>& input_x, const MaxPoolOp& op);
+
     std::shared_ptr<GtzGate<ShrType>>
     gtz(const std::shared_ptr<Gate<ShrType>>& input_x);
 
@@ -83,7 +93,7 @@ private:
 
 
 template <IsSpdz2kShare ShrType>
-void Circuit<ShrType>::addEndPoint(const std::shared_ptr<Gate<ShrType>>& gate) {
+void Circuit<ShrType>::addEndpoint(const std::shared_ptr<Gate<ShrType>>& gate) {
     endpoints_.push_back(gate);
 }
 
@@ -148,6 +158,15 @@ subtract(const std::shared_ptr<Gate<ShrType>>& input_x,
 }
 
 template <IsSpdz2kShare ShrType>
+std::shared_ptr<AddConstantGate<ShrType>> Circuit<ShrType>::
+addConstant(const std::shared_ptr<Gate<ShrType>>& input_x,
+            ClearType constant) {
+    auto gate = std::make_shared<AddConstantGate<ShrType>>(input_x, constant);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType>
 std::shared_ptr<MultiplyGate<ShrType>> Circuit<ShrType>::
 multiply(const std::shared_ptr<Gate<ShrType>>& input_x,
          const std::shared_ptr<Gate<ShrType>>& input_y) {
@@ -198,6 +217,15 @@ conv2DTrunc(const std::shared_ptr<Gate<ShrType>>& input_x,
             const std::shared_ptr<Gate<ShrType>>& input_y,
             const Conv2DOp& op) {
     auto gate = std::make_shared<Conv2DTruncGate<ShrType>>(input_x, input_y, op);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType>
+std::shared_ptr<AvgPool2DGate<ShrType>> Circuit<ShrType>::
+avgPool2D(const std::shared_ptr<Gate<ShrType>>& input_x,
+          const MaxPoolOp& op) {
+    auto gate = std::make_shared<AvgPool2DGate<ShrType>>(input_x, op);
     gates_.push_back(gate);
     return gate;
 }

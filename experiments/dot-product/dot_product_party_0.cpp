@@ -23,7 +23,7 @@ int main() {
     auto b = circuit.input(0, dim, 1);
     auto c = circuit.multiply(a, b);
     auto d = circuit.output(c);
-    circuit.addEndPoint(d);
+    circuit.addEndpoint(d);
 
     a->setInput(vec);
     b->setInput(vec);

@@ -6,6 +6,7 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <excludeRoots>
+      <file path="$PROJECT_DIR$/build" />
       <file path="$PROJECT_DIR$/fake-offline-data" />
     </excludeRoots>
   </component>

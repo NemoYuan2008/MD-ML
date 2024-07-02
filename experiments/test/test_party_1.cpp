@@ -11,7 +11,7 @@ using namespace std;
 using namespace md_ml;
 
 int main() {
-    using ShrType = Spdz2kShare32;
+    using ShrType = Spdz2kShare64;
     using ClearType = ShrType::ClearType;
 
     PartyWithFakeOffline<ShrType> party(1, 2, 5050, "test");
@@ -22,7 +22,7 @@ int main() {
     // auto b = circuit.input(0, 1, 1);
     // auto c = circuit.multiplyTrunc(a, b);
     // auto d = circuit.output(c);
-    // circuit.addEndPoint(d);
+    // circuit.addEndpoint(d);
 
     // circuit.readOfflineFromFile();
     // circuit.runOnlineWithBenckmark();
@@ -59,7 +59,7 @@ int main() {
     // auto a = circuit.conv2D(input_image, kernel, conv_op);
     // auto o = circuit.output(a);
     //
-    // circuit.addEndPoint(o);
+    // circuit.addEndpoint(o);
     // circuit.readOfflineFromFile();
     // circuit.runOnlineWithBenckmark();
     // circuit.printStats();
@@ -67,17 +67,56 @@ int main() {
     // auto output = o->getClear();
     // PrintVector(output);
 
-    // Test for Gtz correctness
-    auto input_x = circuit.input(0, 10, 1);
-    auto a = circuit.gtz(input_x);
+    // // Test for Gtz correctness
+    // auto input_x = circuit.input(0, 10, 1);
+    // auto a = circuit.gtz(input_x);
+    // auto o = circuit.output(a);
+    //
+    // circuit.addEndpoint(o);
+    // circuit.readOfflineFromFile();
+    // circuit.runOnlineWithBenckmark();
+    // circuit.printStats();
+    //
+    // auto output = o->getClear();
+    // PrintVector(output);
+
+    // // Test for ReLU correctness
+    // auto a = circuit.input(0, 3, 1);
+    // auto b = circuit.relu(a);
+    // auto o = circuit.output(b);
+    //
+    // circuit.addEndpoint(o);
+    // circuit.readOfflineFromFile();
+    // circuit.runOnlineWithBenckmark();
+    // circuit.printStats();
+    //
+    // auto output = o->getClear();
+    // PrintVector(output);
+
+    // Test for AvgPool2D correctness
+    const int rows = 32;
+    const int cols = 32;
+    const int kernel_size = 5;
+    const int stride = 1;
+
+    const MaxPoolOp op = {
+        .input_shape_ = {1, rows, cols},
+        .output_shape_ = {1, (rows + 1 - kernel_size) / stride, (cols + 1 - kernel_size) / stride},
+        .kernel_shape_ = {kernel_size, kernel_size},
+        .strides_ = {1, 1},
+    };
+
+    auto x = circuit.input(0, rows, cols);
+    auto a = circuit.avgPool2D(x, op);
     auto o = circuit.output(a);
 
-    circuit.addEndPoint(o);
+    circuit.addEndpoint(o);
     circuit.readOfflineFromFile();
     circuit.runOnlineWithBenckmark();
     circuit.printStats();
 
     auto output = o->getClear();
+    cout << "Output: ";
     PrintVector(output);
 
 

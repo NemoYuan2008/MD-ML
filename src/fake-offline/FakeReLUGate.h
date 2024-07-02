@@ -37,7 +37,7 @@ FakeReLUGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x)
     this->set_dim_col(p_input_x->dim_col());
 
     auto b = this->circuit_.gtz(this->input_x());
-    auto z = this->circuit_.element_multiply(this->input_x(), b);
+    auto z = this->circuit_.elementMultiply(this->input_x(), b);
     circuit_.addEndpoint(z);
 }
 

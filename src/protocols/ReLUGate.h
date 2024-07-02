@@ -33,7 +33,7 @@ private:
 template <IsSpdz2kShare ShrType>
 ReLUGate<ShrType>::
 ReLUGate(const std::shared_ptr<Gate<ShrType>>& input_x)
-    : Gate<ShrType>(input_x, nullptr), circuit_(input_x->getParty()) {
+    : Gate<ShrType>(input_x, nullptr), circuit_(input_x->party()) {
     this->set_dim_row(input_x->dim_row());
     this->set_dim_col(input_x->dim_col());
 

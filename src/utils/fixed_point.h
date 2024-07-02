@@ -17,6 +17,7 @@ template <typename Tp>
 Tp truncateClear(Tp x);
 
 template <typename Tp>
+[[nodiscard]]
 std::vector<Tp> truncateClearVec(const std::vector<Tp>& x);
 
 template <typename Tp>
@@ -47,6 +48,7 @@ Tp truncateClear(Tp x) {
 }
 
 template <typename Tp>
+[[nodiscard]]
 std::vector<Tp> truncateClearVec(const std::vector<Tp>& x) {
     std::vector<Tp> ret(x.size());
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL

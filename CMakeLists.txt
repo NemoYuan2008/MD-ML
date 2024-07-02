@@ -64,6 +64,7 @@ set(SRC_FAKE_OFFLINE
         src/fake-offline/FakeAddConstantGate.h
         src/fake-offline/FakeReLUGate.h
         src/fake-offline/FakeElemMultiplyGate.h
+        src/fake-offline/FakeAvgPool2DGate.h
 )
 
 set(SRC_UTILS
@@ -91,6 +92,7 @@ set(SRC_PROTOCOLS
         src/protocols/AddConstantGate.h
         src/protocols/ElemMultiplyGate.h
         src/protocols/ReLUGate.h
+        src/protocols/AvgPool2DGate.h
 )
 
 set(SRC_FILES

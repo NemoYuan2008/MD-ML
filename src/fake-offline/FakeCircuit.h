@@ -21,6 +21,7 @@
 #include "fake-offline/FakeElemMultiplyGate.h"
 #include "fake-offline/FakeConv2DGate.h"
 #include "fake-offline/FakeConv2DTruncGate.h"
+#include "fake-offline/FakeAvgPool2DGate.h"
 #include "fake-offline/FakeGtzGate.h"
 #include "fake-offline/FakeReLUGate.h"
 
@@ -82,6 +83,10 @@ public:
     conv2DTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
                 const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
                 const Conv2DOp& op);
+
+    std::shared_ptr<FakeAvgPool2DGate<ShrType, N>>
+    avgPool2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+              const MaxPoolOp& op);
 
     std::shared_ptr<FakeGtzGate<ShrType, N>>
     gtz(const std::shared_ptr<FakeGate<ShrType, N>>& input_x);
@@ -199,6 +204,15 @@ conv2DTrunc(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
             const std::shared_ptr<FakeGate<ShrType, N>>& input_y,
             const Conv2DOp& op) {
     auto gate = std::make_shared<FakeConv2DTruncGate<ShrType, N>>(input_x, input_y, op);
+    gates_.push_back(gate);
+    return gate;
+}
+
+template <IsSpdz2kShare ShrType, std::size_t N>
+std::shared_ptr<FakeAvgPool2DGate<ShrType, N>> FakeCircuit<ShrType, N>::
+avgPool2D(const std::shared_ptr<FakeGate<ShrType, N>>& input_x,
+          const MaxPoolOp& op) {
+    auto gate = std::make_shared<FakeAvgPool2DGate<ShrType, N>>(input_x, op);
     gates_.push_back(gate);
     return gate;
 }
