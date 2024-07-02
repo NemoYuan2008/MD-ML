@@ -1,15 +1,14 @@
 // By Boshi Yuan
 
-#ifndef MD_ML_MULTIPLYTRUNCGATE_H
-#define MD_ML_MULTIPLYTRUNCGATE_H
+#ifndef CONV2DTRUNCGATE_H
+#define CONV2DTRUNCGATE_H
 
 
 #include <memory>
 #include <vector>
-#include <stdexcept>
 
 #include "protocols/Gate.h"
-#include "protocols/MultiplyGate.h"
+#include "protocols/Conv2DGate.h"
 #include "share/IsSpdz2kShare.h"
 #include "utils/fixed_point.h"
 
@@ -17,12 +16,13 @@
 namespace md_ml {
 
 template <IsSpdz2kShare ShrType>
-class MultiplyTruncGate : public MultiplyGate<ShrType> {
+class Conv2DTruncGate : public Conv2DGate<ShrType> {
 public:
     using SemiShrType = typename ShrType::SemiShrType;
 
-    MultiplyTruncGate(const std::shared_ptr<Gate<ShrType>>& p_input_x,
-                      const std::shared_ptr<Gate<ShrType>>& p_input_y);
+    Conv2DTruncGate(const std::shared_ptr<Gate<ShrType>>& p_input_x,
+                    const std::shared_ptr<Gate<ShrType>>& p_input_y,
+                    const Conv2DOp& op);
 
 protected:
     void doReadOfflineFromFile() override;
@@ -33,23 +33,20 @@ private:
     std::vector<SemiShrType> lambda_prime_shr_mac_;
 };
 
-
 template <IsSpdz2kShare ShrType>
-MultiplyTruncGate<ShrType>::
-MultiplyTruncGate(const std::shared_ptr<Gate<ShrType>>& p_input_x,
-                  const std::shared_ptr<Gate<ShrType>>& p_input_y)
-    : MultiplyGate<ShrType>(p_input_x, p_input_y) {
-    // Check and set dimensions
-    if (p_input_x->dim_col() != p_input_y->dim_row()) {
-        throw std::invalid_argument("The inputs of multiplication gate should have compatible dimensions");
-    }
+Conv2DTruncGate<ShrType>::
+Conv2DTruncGate(const std::shared_ptr<Gate<ShrType>>& p_input_x,
+                const std::shared_ptr<Gate<ShrType>>& p_input_y,
+                const Conv2DOp& op)
+    : Conv2DGate<ShrType>(p_input_x, p_input_y, op) {
+    // The dimensions are already set in the base class
 }
 
-
 template <IsSpdz2kShare ShrType>
-void MultiplyTruncGate<ShrType>::doReadOfflineFromFile() {
-    MultiplyGate<ShrType>::doReadOfflineFromFile();
-    auto size_output = this->dim_row() * this->dim_col();
+void Conv2DTruncGate<ShrType>::doReadOfflineFromFile() {
+    Conv2DGate<ShrType>::doReadOfflineFromFile();
+
+    auto size_output = this->conv_op().compute_output_size();
 
     // The lambda_shr_ in the base class is actually lambda_prime_shr_ here, so is the lambda_shr_mac_.
     // So we compute the real lambda_shr_ in lambda_prime_shr_, and the real lambda_shr_mac_ in lambda_prime_shr_mac_.
@@ -58,10 +55,9 @@ void MultiplyTruncGate<ShrType>::doReadOfflineFromFile() {
     lambda_prime_shr_mac_ = this->party().ReadShares(size_output);
 }
 
-
 template <IsSpdz2kShare ShrType>
-void MultiplyTruncGate<ShrType>::doRunOnline() {
-    MultiplyGate<ShrType>::doRunOnline();
+void Conv2DTruncGate<ShrType>::doRunOnline() {
+    Conv2DGate<ShrType>::doRunOnline();
 
     // The swap is done after the computation of the multiplication,
     // because the real prime values are used in the protocol.
@@ -74,4 +70,4 @@ void MultiplyTruncGate<ShrType>::doRunOnline() {
 
 } // namespace md_ml
 
-#endif //MD_ML_MULTIPLYTRUNCGATE_H
+#endif //CONV2DTRUNCGATE_H

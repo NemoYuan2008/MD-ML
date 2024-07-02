@@ -5,7 +5,6 @@
 
 #include <memory>
 #include <vector>
-#include <stdexcept>
 #include <thread>
 
 #include "protocols/Gate.h"
@@ -24,12 +23,14 @@ public:
                const std::shared_ptr<Gate<ShrType>>& p_input_y,
                const Conv2DOp& op);
 
+    [[nodiscard]] const Conv2DOp& conv_op() const { return conv_op_; }
+
 protected:
     void doReadOfflineFromFile() override;
     void doRunOnline() override;
 
 private:
-    Conv2DOp convOp;
+    Conv2DOp conv_op_;
     std::vector<SemiShrType> a_shr_, a_shr_mac_;
     std::vector<SemiShrType> b_shr_, b_shr_mac_;
     std::vector<SemiShrType> c_shr_, c_shr_mac_;
@@ -42,16 +43,16 @@ Conv2DGate<ShrType>::
 Conv2DGate(const std::shared_ptr<Gate<ShrType>>& p_input_x,
            const std::shared_ptr<Gate<ShrType>>& p_input_y,
            const Conv2DOp& op)
-    : Gate<ShrType>(p_input_x, p_input_y), convOp(op) {
-    this->set_dim_row(convOp.compute_output_size());
+    : Gate<ShrType>(p_input_x, p_input_y), conv_op_(op) {
+    this->set_dim_row(conv_op_.compute_output_size());
     this->set_dim_col(1);
 }
 
 template <IsSpdz2kShare ShrType>
 void Conv2DGate<ShrType>::doReadOfflineFromFile() {
-    auto size_lhs = convOp.compute_input_size();
-    auto size_rhs = convOp.compute_kernel_size();
-    auto size_output = convOp.compute_output_size();
+    auto size_lhs = conv_op_.compute_input_size();
+    auto size_rhs = conv_op_.compute_kernel_size();
+    auto size_output = conv_op_.compute_output_size();
 
     a_shr_ = this->party().ReadShares(size_lhs);
     a_shr_mac_ = this->party().ReadShares(size_lhs);
@@ -72,17 +73,17 @@ void Conv2DGate<ShrType>::doRunOnline() {
     // temp_y = $\Delta_y + \delta_y$
     auto temp_y = matrixAdd(this->input_y()->Delta_clear(), delta_y_clear_);
     // temp_xy = temp_x * temp_y
-    auto temp_xy = convolution(temp_x, temp_y, convOp);
+    auto temp_xy = convolution(temp_x, temp_y, conv_op_);
 
     // Compute [Delta_z] according to the paper
     // [Delta_z] = [c] + [lambda_z]
     auto Delta_z_shr = matrixAdd(c_shr_, this->lambda_shr());
     // [Delta_z] -= [a] * temp_y
     matrixSubtractAssign(Delta_z_shr,
-                         convolution(a_shr_, temp_y, convOp));
+                         convolution(a_shr_, temp_y, conv_op_));
     // [Delta_z] -= temp_x * [b]
     matrixSubtractAssign(Delta_z_shr,
-                         convolution(temp_x, b_shr_, convOp));
+                         convolution(temp_x, b_shr_, conv_op_));
     if (this->my_id() == 0) {
         // [Delta_z] += temp_xy
         matrixAddAssign(Delta_z_shr, temp_xy);
@@ -97,10 +98,10 @@ void Conv2DGate<ShrType>::doRunOnline() {
                        matrixAdd(c_shr_mac_, this->lambda_shr_mac()));
     // [Delta_z_mac] -= [a_mac] * temp_y
     matrixSubtractAssign(Delta_z_mac,
-                        convolution(a_shr_mac_, temp_y, convOp));
+                        convolution(a_shr_mac_, temp_y, conv_op_));
     // [Delta_z_mac] -= temp_x * [b_mac]
     matrixSubtractAssign(Delta_z_mac,
-                        convolution(temp_x, b_shr_mac_, convOp));
+                        convolution(temp_x, b_shr_mac_, conv_op_));
 
     std::thread t1([&, this] {
         this->party().SendVecToOther(Delta_z_shr);

@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <execution>
+#include <concepts>
 
 #include <Eigen/Core>
 
@@ -44,6 +45,21 @@ void matrixAddAssign(std::vector<T>& x, const std::vector<T>& y) {
 }
 
 
+template <typename T1, std::integral T2>
+inline
+std::vector<T1> matrixAddConstant(const std::vector<T1>& x, T2 constant) {
+    std::vector<T1> output(x.size());
+#ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
+    std::transform(x.begin(), x.end(), output.begin(),
+                   [constant](T1 val) { return val + constant; });
+#else
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), output.begin(),
+                   [constant](T1 val) { return val + constant; });
+#endif
+    return output;
+}
+
+
 template <typename T>
 inline
 std::vector<T> matrixSubtract(const std::vector<T>& x, const std::vector<T>& y) {
@@ -78,7 +94,8 @@ std::vector<T> matrixScalar(const std::vector<T>& x, T scalar) {
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
     std::transform(x.begin(), x.end(), output.begin(), [scalar](T val) { return scalar * val; });
 #else
-    std::transform(std::execution::par_unseq, x.begin(), x.end(), output.begin(), [scalar](T val) { return scalar * val; });
+    std::transform(std::execution::par_unseq, x.begin(), x.end(), output.begin(),
+                   [scalar](T val) { return scalar * val; });
 #endif
     return output;
 }

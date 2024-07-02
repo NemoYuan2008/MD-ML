@@ -35,7 +35,7 @@ protected:
     void doRunOffline() override;
 
 private:
-    Conv2DOp convOp;
+    Conv2DOp conv_op_;
 };
 
 
@@ -44,17 +44,17 @@ FakeConv2DGate<ShrType, N>::
 FakeConv2DGate(const std::shared_ptr<FakeGate<ShrType, N>>& p_input_x,
                const std::shared_ptr<FakeGate<ShrType, N>>& p_input_y,
                const Conv2DOp& op)
-    : FakeGate<ShrType, N>(p_input_x, p_input_y), convOp(op) {
-    this->set_dim_row(convOp.compute_output_size());
+    : FakeGate<ShrType, N>(p_input_x, p_input_y), conv_op_(op) {
+    this->set_dim_row(conv_op_.compute_output_size());
     this->set_dim_col(1);
 }
 
 
 template <IsSpdz2kShare ShrType, std::size_t N>
 void FakeConv2DGate<ShrType, N>::doRunOffline() {
-    auto size_lhs = convOp.compute_input_size();
-    auto size_rhs = convOp.compute_kernel_size();
-    auto size_output = convOp.compute_output_size();
+    auto size_lhs = conv_op_.compute_input_size();
+    auto size_rhs = conv_op_.compute_kernel_size();
+    auto size_output = conv_op_.compute_output_size();
 
     // $\lambda_z$ = rand()
     this->lambda_clear().resize(size_output);
@@ -69,7 +69,7 @@ void FakeConv2DGate<ShrType, N>::doRunOffline() {
     std::vector<ClearType> b_clear(size_rhs);
     std::ranges::generate(a_clear, getRand<ClearType>);
     std::ranges::generate(b_clear, getRand<ClearType>);
-    auto c_clear = convolution(a_clear, b_clear, convOp);
+    auto c_clear = convolution(a_clear, b_clear, conv_op_);
 
     auto a_share_with_mac = this->fake_party().GenerateAllPartiesShares(a_clear);
     auto b_share_with_mac = this->fake_party().GenerateAllPartiesShares(b_clear);
