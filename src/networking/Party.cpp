@@ -32,7 +32,7 @@ Party::Party(std::size_t p_my_id, std::size_t p_num_parties, std::size_t p_port)
         send_endpoints_.emplace_back(boost::asio::ip::make_address("127.0.0.1"), WhichPort(my_id_, other_id));
 
         // receive_endpoint is used only once and is not stored
-        auto receive_endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), WhichPort(other_id, my_id_));
+        boost::asio::ip::tcp::endpoint receive_endpoint(boost::asio::ip::tcp::v4(), WhichPort(other_id, my_id_));
         acceptors_.emplace_back(io_context_, receive_endpoint);
     }
 

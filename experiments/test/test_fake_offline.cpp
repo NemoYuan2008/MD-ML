@@ -12,7 +12,7 @@ using namespace std;
 using namespace md_ml;
 
 int main() {
-    using ShrType = Spdz2kShare64;
+    using ShrType = Spdz2kShare32;
 
     FakeParty<ShrType, 2> party("test");
     FakeCircuit<ShrType, 2> circuit(party);
@@ -62,7 +62,7 @@ int main() {
     // circuit.runOffline();
 
     // Test for Gtz correctness
-    auto input_x = circuit.input(0, 1, 1);
+    auto input_x = circuit.input(0, 10, 1);
     auto a = circuit.gtz(input_x);
     auto o = circuit.output(a);
 
