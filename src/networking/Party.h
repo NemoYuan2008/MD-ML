@@ -57,7 +57,7 @@ public:
     [[nodiscard]] uint64_t bytes_sent() const { return bytes_sent_; }
 
 private:
-    [[nodiscard]] boost::asio::ip::port_type WhichPort(std::size_t from_id, std::size_t to_id) const;
+    [[nodiscard]] uint16_t WhichPort(std::size_t from_id, std::size_t to_id) const;
 
     void TryAccept(std::size_t from_id);
     void TryConnect(std::size_t to_id);

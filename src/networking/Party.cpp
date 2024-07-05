@@ -64,12 +64,12 @@ Party::Party(std::size_t p_my_id, std::size_t p_num_parties, std::size_t p_port)
 }
 
 
-boost::asio::ip::port_type Party::WhichPort(std::size_t from_id, std::size_t to_id) const {
+uint16_t Party::WhichPort(std::size_t from_id, std::size_t to_id) const {
     std::size_t ret = port_base_ + from_id * num_parties_ + to_id;
     if (ret > 65535) {
         throw std::invalid_argument("Port number exceeds 65535");
     }
-    return static_cast<boost::asio::ip::port_type>(ret);
+    return static_cast<uint16_t>(ret);
 }
 
 

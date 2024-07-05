@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.12) # This is the minimum version of CMake that we have tested with
 project(MD-ML)
-
 set(CMAKE_CXX_STANDARD 20)
 
-set(INCLUDE_DIR) # List of include directories
-set(ONLINE_LIB) # List of libraries to link against for online execution
-set(FAKE_OFFLINE_LIB) # List of libraries to link against for fake offline execution
+set(BOOST_MIN_VERSION "1.70.0") # This is the minimum version of Boost that we have tested with
+
+set(INCLUDE_DIR) # List of include directories, to be modified below
+set(ONLINE_LIB) # List of libraries to link against for online execution, to be modified below
+set(FAKE_OFFLINE_LIB) # List of libraries to link against for fake offline execution, to be modified below
+
 
 set(INCLUDE_DIR ${INCLUDE_DIR} src)
 
@@ -16,7 +18,7 @@ set(FAKE_OFFLINE_LIB ${FAKE_OFFLINE_LIB} Eigen3::Eigen)
 
 # Import Boost, we only need the header-only Boost::Asio library,
 # so we do not specify components, nor do we add it to the list of libraries
-find_package(Boost REQUIRED)
+find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
 set(INCLUDE_DIR ${INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 include_directories(${INCLUDE_DIR})
