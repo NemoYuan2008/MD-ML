@@ -28,6 +28,11 @@ if (WIN32)
     set(ONLINE_LIB ${ONLINE_LIB} ws2_32 wsock32)
 endif ()
 
+# Threads library on linux 
+if (UNIX)
+    find_package(Threads REQUIRED)
+    set(ONLINE_LIB ${ONLINE_LIB} Threads::Threads)
+endif ()
 
 # Create a directory for fake offline data, and pass it to the compiler
 set(FAKE_OFFLINE_DIR "${PROJECT_SOURCE_DIR}/fake-offline-data")
