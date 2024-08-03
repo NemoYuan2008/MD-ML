@@ -9,3 +9,5 @@ add_library(md-ml-networking ${SRC_NETWORKING})
 if (WIN32)
     target_link_libraries(md-ml-networking ws2_32 wsock32)
 endif ()
+
+set(ONLINE_LIB ${ONLINE_LIB} md-ml-networking PARENT_SCOPE)

@@ -27,12 +27,13 @@ namespace md_ml {
 //
 // For matrix multiplication, we use Eigen's implementation.
 //
+// WARNING:
 // To improve efficiency, the dimensions are not checked in these functions,
 // instead, they are checked in the constructor of the gate classes,
 // so the checks are carried out prior to the online phase.
 
 
-template <typename T>
+template <std::integral T>
 inline
 std::vector<T> matrixAdd(const std::vector<T>& x, const std::vector<T>& y) {
     std::vector<T> output(x.size());
@@ -47,7 +48,7 @@ std::vector<T> matrixAdd(const std::vector<T>& x, const std::vector<T>& y) {
 }
 
 
-template <typename T>
+template <std::integral T>
 inline
 void matrixAddAssign(std::vector<T>& x, const std::vector<T>& y) {
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
@@ -58,7 +59,7 @@ void matrixAddAssign(std::vector<T>& x, const std::vector<T>& y) {
 }
 
 
-template <typename T1, std::integral T2>
+template <std::integral T1, std::integral T2>
 inline
 std::vector<T1> matrixAddConstant(const std::vector<T1>& x, T2 constant) {
     std::vector<T1> output(x.size());
@@ -73,7 +74,7 @@ std::vector<T1> matrixAddConstant(const std::vector<T1>& x, T2 constant) {
 }
 
 
-template <typename T>
+template <std::integral T>
 inline
 std::vector<T> matrixSubtract(const std::vector<T>& x, const std::vector<T>& y) {
     std::vector<T> output(x.size());
@@ -88,7 +89,7 @@ std::vector<T> matrixSubtract(const std::vector<T>& x, const std::vector<T>& y) 
 }
 
 
-template <typename T>
+template <std::integral T>
 inline
 void matrixSubtractAssign(std::vector<T>& x, const std::vector<T>& y) {
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
@@ -100,7 +101,7 @@ void matrixSubtractAssign(std::vector<T>& x, const std::vector<T>& y) {
 
 
 // matrix scalar product
-template <typename T>
+template <std::integral T>
 inline
 std::vector<T> matrixScalar(const std::vector<T>& x, T scalar) {
     std::vector<T> output(x.size());
@@ -113,7 +114,7 @@ std::vector<T> matrixScalar(const std::vector<T>& x, T scalar) {
     return output;
 }
 
-template <typename T>
+template <std::integral T>
 inline
 void matrixScalarAssign(std::vector<T>& x, T scalar) {
 #ifdef _LIBCPP_HAS_NO_INCOMPLETE_PSTL
@@ -124,7 +125,7 @@ void matrixScalarAssign(std::vector<T>& x, T scalar) {
 }
 
 
-template <typename T>
+template <std::integral T>
 inline
 std::vector<T> matrixElemMultiply(std::vector<T>& x, std::vector<T>& y) {
     std::vector<T> output(x.size());
@@ -140,7 +141,7 @@ std::vector<T> matrixElemMultiply(std::vector<T>& x, std::vector<T>& y) {
 }
 
 
-template <typename T>
+template <std::integral T>
 inline
 void matrixMultiply(const T* lhs, const T* rhs, T* output,
                     std::size_t dim_row, std::size_t dim_mid, std::size_t dim_col) {
@@ -154,7 +155,7 @@ void matrixMultiply(const T* lhs, const T* rhs, T* output,
 }
 
 
-template <typename T>
+template <std::integral T>
 inline
 std::vector<T> matrixMultiply(const std::vector<T>& lhs, const std::vector<T>& rhs,
                               std::size_t dim_row, std::size_t dim_mid, std::size_t dim_col) {

@@ -121,13 +121,13 @@ GenerateAllPartiesShares(ClearType value) const {
     auto& value_shares = all_parties_shares.value_shares;
     std::generate_n(value_shares.begin(), N - 1, getRand<SemiShrType>);
     value_shares.back() = masked_value - std::accumulate(value_shares.begin(), value_shares.end() - 1,
-                                                         SemiShrType(0)); // we can't use 0LL here
+                                                         SemiShrType{0}); // we can't use 0LL here
 
     // generate the shares of the mac in the same way
     auto& mac_shares = all_parties_shares.mac_shares;
     std::generate_n(mac_shares.begin(), N - 1, getRand<SemiShrType>);
     mac_shares.back() = mac - std::accumulate(mac_shares.begin(), mac_shares.end() - 1,
-                                              SemiShrType(0));
+                                              SemiShrType{0});
 
     return all_parties_shares;
 }
