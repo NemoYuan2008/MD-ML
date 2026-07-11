@@ -16,24 +16,25 @@ int main() {
     PartyWithFakeOffline<ShrType> party(0, 2, 5050, "test");
     Circuit<ShrType> circuit(party);
 
-    // Tests for truncation correctness
-    auto a = circuit.input(0, 1, 1);
-    auto b = circuit.input(0, 1, 1);
-    auto c = circuit.multiplyTrunc(a, b);
-    auto d = circuit.output(c);
-    circuit.addEndpoint(d);
-
-    vector<ClearType> vec{};
-    vec.push_back(double2fix<ClearType>(1.5));
-    a->setInput(vec);
-    b->setInput(vec);
-
-    circuit.readOfflineFromFile();
-    circuit.runOnlineWithBenckmark();
-    circuit.printStats();
-
-    auto o = d->getClear();
-    cout << "output: " << fix2double<ClearType>(o[0]) << endl;
+    // // Tests for truncation correctness
+    // auto a = circuit.input(0, 1, 1);
+    // auto b = circuit.input(0, 1, 1);
+    // auto c = circuit.multiplyTrunc(a, b);
+    // auto d = circuit.output(c);
+    // circuit.addEndpoint(d);
+    //
+    // vector<ClearType> vec{};
+    // vec.push_back(double2fix<ClearType>(1.5));
+    // a->setInput(vec);
+    // b->setInput(vec);
+    //
+    // circuit.readOfflineFromFile();
+    // circuit.runOnlineWithBenckmark();
+    // circuit.printStats();
+    //
+    // auto o = d->getClear();
+    // cout << "output: " << fix2double<ClearType>(o[0]) << endl;
+    //
 
     // // Test for Conv2D correctness
     // const size_t rows = 5;
@@ -92,22 +93,24 @@ int main() {
     // auto output = o->getClear();
     // PrintVector(output);
 
-    // // Test for Gtz correctness
-    // auto input_x = circuit.input(0, 10, 1);
-    // auto a = circuit.gtz(input_x);
-    // auto o = circuit.output(a);
-    //
-    // vector<ClearType> input_vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    // input_x->setInput(input_vec);
-    //
-    // circuit.addEndpoint(o);
-    // circuit.readOfflineFromFile();
-    // circuit.runOnlineWithBenckmark();
-    // circuit.printStats();
-    //
-    // auto output = o->getClear();
-    // cout << "Output: ";
-    // PrintVector(output);
+    // Test for Gtz correctness
+    auto input_x = circuit.input(0, 10, 1);
+    auto a = circuit.gtz(input_x);
+    auto o = circuit.output(a);
+
+    ClearType P = 1 << 64;
+
+    vector<ClearType> input_vec{1, 2, P - 3, 4, 5, P - 6, 7, 8, P - 9, 10};
+    input_x->setInput(input_vec);
+
+    circuit.addEndpoint(o);
+    circuit.readOfflineFromFile();
+    circuit.runOnlineWithBenckmark();
+    circuit.printStats();
+
+    auto output = o->getClear();
+    cout << "Output: ";
+    PrintVector(output);
 
     // // Test for ReLU correctness
     // auto a = circuit.input(0, 3, 1);

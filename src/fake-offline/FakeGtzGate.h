@@ -64,10 +64,10 @@ void FakeGtzGate<ShrType, N>::doRunOffline() {
     this->fake_party().WriteSharesToAllParites(this->lambda_shr());
     this->fake_party().WriteSharesToAllParites(this->lambda_shr_mac());
 
-    // Boolean shares of lambda_x
+    // Boolean shares of the input mask lambda_x
     // TODO: clean up the code, extract the boolean share generation to a function
     for (std::size_t vec_idx = 0; vec_idx < size; ++vec_idx) {
-        auto shares_i = generateBooleanShares(this->lambda_clear()[vec_idx]);
+        auto shares_i = generateBooleanShares(this->input_x()->lambda_clear()[vec_idx]);
         for (std::size_t party_idx = 0; party_idx < N; ++party_idx) {
             this->fake_party().ithPartyFile(party_idx) << shares_i[party_idx] << '\n';
         }

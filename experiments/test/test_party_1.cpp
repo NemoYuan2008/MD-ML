@@ -17,16 +17,17 @@ int main() {
     PartyWithFakeOffline<ShrType> party(1, 2, 5050, "test");
     Circuit<ShrType> circuit(party);
 
-    // Tests for truncation correctness
-    auto a = circuit.input(0, 1, 1);
-    auto b = circuit.input(0, 1, 1);
-    auto c = circuit.multiplyTrunc(a, b);
-    auto d = circuit.output(c);
-    circuit.addEndpoint(d);
+    // // Tests for truncation correctness
+    // auto a = circuit.input(0, 1, 1);
+    // auto b = circuit.input(0, 1, 1);
+    // auto c = circuit.multiplyTrunc(a, b);
+    // auto d = circuit.output(c);
+    // circuit.addEndpoint(d);
+    //
+    // circuit.readOfflineFromFile();
+    // circuit.runOnlineWithBenckmark();
+    // circuit.printStats();
 
-    circuit.readOfflineFromFile();
-    circuit.runOnlineWithBenckmark();
-    circuit.printStats();
 
     // // Test for Conv2D correctness
     // const size_t rows = 5;
@@ -67,18 +68,18 @@ int main() {
     // auto output = o->getClear();
     // PrintVector(output);
 
-    // // Test for Gtz correctness
-    // auto input_x = circuit.input(0, 10, 1);
-    // auto a = circuit.gtz(input_x);
-    // auto o = circuit.output(a);
-    //
-    // circuit.addEndpoint(o);
-    // circuit.readOfflineFromFile();
-    // circuit.runOnlineWithBenckmark();
-    // circuit.printStats();
-    //
-    // auto output = o->getClear();
-    // PrintVector(output);
+    // Test for Gtz correctness
+    auto input_x = circuit.input(0, 10, 1);
+    auto a = circuit.gtz(input_x);
+    auto o = circuit.output(a);
+
+    circuit.addEndpoint(o);
+    circuit.readOfflineFromFile();
+    circuit.runOnlineWithBenckmark();
+    circuit.printStats();
+
+    auto output = o->getClear();
+    PrintVector(output);
 
     // // Test for ReLU correctness
     // auto a = circuit.input(0, 3, 1);

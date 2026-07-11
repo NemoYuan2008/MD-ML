@@ -32,8 +32,8 @@ private:
     // bool CarryOutAux(std::bitset<sizeof(T) * 8> p,
     //                  std::bitset<sizeof(T) * 8> g, int k);
 
-    std::vector<bool> BitLT(std::vector<ClearType>& pInt, // output s = (pInt < sInt)
-                            std::vector<ClearType>& sInt);
+    std::vector<bool> BitLT(const std::vector<ClearType>& pInt, // output s = (pInt < sInt)
+                            const std::vector<ClearType>& sInt);
 
     std::vector<bool> CarryOutCin(std::vector<std::bitset<sizeof(ClearType) * 8>>& aIn,
                                   std::vector<std::bitset<sizeof(ClearType) * 8>>& bIn,
@@ -81,14 +81,10 @@ void GtzGate<ShrType>::doRunOnline() {
     //        printVector(this->lambda_xBinShr);
 #endif
 
-    // const auto& delta_x_semiShr = this->input_x->getDeltaClear();
     const auto& delta_x_semiShr = this->input_x()->Delta_clear(); // By ybs
 
     std::vector<ClearType> delta_x(delta_x_semiShr.begin(), delta_x_semiShr.end());
     auto ret = BitLT(delta_x, this->lambda_xBinShr);
-    if (this->my_id() == 0) {
-        std::transform(ret.begin(), ret.end(), ret.begin(), std::logical_not<>());
-    }
 
 #ifndef NDEBUG
     //        std::cout << "delta_x: ";
@@ -98,8 +94,6 @@ void GtzGate<ShrType>::doRunOnline() {
     //        std::cout << "Ret value of BitLT:";
     //        printVector(ret);
 #endif
-
-    //TODO: this is fake
 
     int msgBytes = (ret.size() + 7) / 8; // round up
     //        std::vector<std::bitset<sizeof(uint8_t) * 8>> sendmsg(msgBytes, 0);
@@ -272,20 +266,34 @@ void GtzGate<ShrType>::doRunOnline() {
 
 template <IsSpdz2kShare ShrType>
 std::vector<bool> GtzGate<ShrType>::
-BitLT(std::vector<ClearType>& pInt, std::vector<ClearType>& sInt) {
+BitLT(const std::vector<ClearType>& pInt, const std::vector<ClearType>& sInt) {
     // output s = (pInt < sInt)
-    std::vector<std::bitset<sizeof(ClearType) * 8>> b_(sInt.size());
     std::vector<std::bitset<sizeof(ClearType) * 8>> a_(pInt.size());
+    std::vector<std::bitset<sizeof(ClearType) * 8>> b_(sInt.size());
+    std::vector<bool> msb_a;
+    std::vector<bool> msb_not_b;
     for (int i = 0; i < sInt.size(); ++i) {
-        if (this->my_id() == 0) b_[i] = ~sInt[i]; //b_[i][j] = 1 - b[i][j]
-        else b_[i] = sInt[i];
         a_[i] = pInt[i];
+        if (this->my_id() == 0) b_[i] = ~sInt[i]; // Boolean share of ~sInt
+        else b_[i] = sInt[i];
+
+        msb_a.push_back(a_[i][sizeof(ClearType) * 8 - 1]);
+        msb_not_b.push_back(b_[i][sizeof(ClearType) * 8 - 1]);
+
+        a_[i][sizeof(ClearType) * 8 - 1] = false;
+        b_[i][sizeof(ClearType) * 8 - 1] = false;
     }
-    auto s = CarryOutCin(a_, b_, 1);
-    for (int i = 0; i < s.size(); ++i) {
-        if (this->my_id() == 0) s[i] = 1 ^ s[i]; //s[i] = 1 -s[i]
+    auto carry_into_msb = CarryOutCin(a_, b_, 1);
+    std::vector<bool> res;
+    for (int i = 0; i < carry_into_msb.size(); ++i) {
+        bool sign_bit = carry_into_msb[i] ^ msb_not_b[i];
+        if (this->my_id() == 0) {
+            sign_bit = sign_bit ^ msb_a[i];
+            sign_bit = sign_bit ^ true; // Return non-negative indicator for ReLU/Gtz.
+        }
+        res.push_back(sign_bit);
     }
-    return s;
+    return res;
 }
 
 
@@ -298,7 +306,7 @@ CarryOutCin(std::vector<std::bitset<sizeof(ClearType) * 8>>& aIn,
     std::vector<std::bitset<sizeof(ClearType) * 8>> p(bIn.size());
     std::vector<std::bitset<sizeof(ClearType) * 8>> g(bIn.size());
     //compute p[i] = a[i]^b[i], g[i] = a[i]*b[i]
-    int numBits = sizeof(ClearType) * 8;
+    int numBits = sizeof(ClearType) * 8 - 1;
     for (int i = 0; i < bIn.size(); ++i) {
         for (int j = 0; j < numBits; j++) {
             if (this->my_id() == 0) p[i][j] = aIn[i][j] ^ bIn[i][j];
@@ -418,11 +426,11 @@ CarryOutAux(std::vector<std::bitset<sizeof(ClearType) * 8>> p,
         }
         if (index_triple < numTriples) std::cout << "triples amount error\n";
         if (k % 2 == 1) {
-            u_len += 1;
             for (int i = 0; i < p.size(); ++i) {
                 u_p[i][u_len] = p[i][k - 1];
                 u_g[i][u_len] = g[i][k - 1];
             }
+            u_len += 1;
         }
         auto ret = CarryOutAux(u_p, u_g, u_len); // u_len : bit length
         return ret;
